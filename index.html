@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Entrenador d'Acords</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #fff;
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .app-container {
+      width: 100%;
+      max-width: 500px;
+      background: #fff;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    .top-bar {
+      background: #16213e;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #0f3460;
+    }
+    
+    .date-time {
+      font-weight: 500;
+      font-size: 1.1rem;
+    }
+    
+    .stats {
+      display: flex;
+      gap: 20px;
+    }
+    
+    .stat-item {
+      text-align: center;
+    }
+    
+    .stat-label {
+      font-size: 0.85rem;
+      opacity: 0.8;
+      margin-bottom: 3px;
+    }
+    
+    .stat-value {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    
+    .content {
+      padding: 25px;
+      color: #333;
+    }
+    
+    .difficulty {
+      background: #e6f7ff;
+      color: #1890ff;
+      font-weight: 500;
+      padding: 5px 12px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+    }
+    
+    .chord-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 25px;
+      color: #0f3460;
+    }
+    
+    .timer-bar {
+      height: 6px;
+      background: #f0f0f0;
+      border-radius: 3px;
+      margin-bottom: 25px;
+      overflow: hidden;
+    }
+    
+    .timer-progress {
+      height: 100%;
+      background: #e94560;
+      width: 30%;
+      transition: width 1s linear;
+    }
+    
+    .result-container {
+      background: #f9f9f9;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 25px;
+      border: 1px solid #eee;
+    }
+    
+    .result-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+      color: #e94560;
+    }
+    
+    .result-content {
+      font-size: 1.2rem;
+      font-weight: 500;
+    }
+    
+    .example {
+      text-align: center;
+      margin: 20px 0;
+    }
+    
+    .example a {
+      color: #0f3460;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 1rem;
+      display: inline-block;
+      padding: 8px 15px;
+      background: #f0f5ff;
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+    
+    .example a:hover {
+      background: #e6eeff;
+    }
+    
+    .next-button {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      background: #0f3460;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 20px;
+    }
+    
+    .next-button:hover {
+      background: #16213e;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(15, 52, 96, 0.3);
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .game-container {
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .chord-question {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin: 20px 0;
+      color: #0f3460;
+    }
+    
+    .answer-input {
+      width: 100%;
+      padding: 15px;
+      font-size: 1.1rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      margin: 15px 0;
+      text-align: center;
+      transition: border 0.3s;
+    }
+    
+    .answer-input:focus {
+      outline: none;
+      border-color: #0f3460;
+      box-shadow: 0 0 0 3px rgba(15, 52, 96, 0.2);
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 15px;
+      margin-top: 15px;
+    }
+    
+    .action-button {
+      flex: 1;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .check-button {
+      background: #1890ff;
+      color: white;
+    }
+    
+    .check-button:hover {
+      background: #096dd9;
+    }
+    
+    .next-button-game {
+      background: #0f3460;
+      color: white;
+    }
+    
+    .next-button-game:hover {
+      background: #16213e;
+    }
+    
+    .result-message {
+      font-weight: 600;
+      margin: 15px 0;
+      font-size: 1.1rem;
+    }
+    
+    .correct {
+      color: #52c41a;
+    }
+    
+    .incorrect {
+      color: #e94560;
+    }
+    
+    .points-display {
+      font-weight: 600;
+      margin: 10px 0;
+    }
+    
+    .time-display {
+      font-weight: 600;
+      color: #e94560;
+      margin: 10px 0;
+    }
+    
+    .summary {
+      font-weight: 600;
+      margin: 15px 0;
+      font-size: 1.1rem;
+      color: #0f3460;
+    }
+    
+    @media (max-width: 480px) {
+      .top-bar {
+        flex-direction: column;
+        gap: 12px;
+      }
+      
+      .button-group {
+        flex-direction: column;
+      }
+      
+      .chord-title {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Capçalera superior com a la imatge -->
+    <div class="top-bar">
+      <div class="date-time">
+        Avui<br>
+        <span id="current-time">13:31</span>
+      </div>
+      <div class="stats">
+        <div class="stat-item">
+          <div class="stat-label">Punts</div>
+          <div class="stat-value" id="punts-display">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Nivell</div>
+          <div class="stat-value" id="nivell-display">Fàcil</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Contingut principal - Pantalla de resultat (com a la imatge) -->
+    <div class="content" id="result-screen">
+      <div class="difficulty">Nivell: Fàcil</div>
+      <h2 class="chord-title">Acord de C</h2>
+      
+      <div class="timer-bar">
+        <div class="timer-progress" id="timer-progress"></div>
+      </div>
+      
+      <div class="result-container">
+        <div class="result-title">Temps esgotat! La resposta era:</div>
+        <div class="result-content">C E G</div>
+      </div>
+      
+      <div class="example">
+        <a href="#">Ex: C E G</a>
+      </div>
+      
+      <button class="next-button" id="btnSeguent">Seguent Acord</button>
+    </div>
+    
+    <!-- Pantalla del joc (funcionalitat completa) -->
+    <div class="game-container hidden" id="game-screen">
+      <h2>🎹 Endevina les notes de l'acord</h2>
+      <p class="chord-question" id="acordPregunta">Carregant acord...</p>
+      
+      <input type="text" id="resposta" class="answer-input" placeholder="Ex: C E G" autocomplete="off" />
+      
+      <div class="button-group">
+        <button class="action-button check-button" id="btnComprovar">Comprovar</button>
+        <button class="action-button next-button-game" id="btnSeguentGame">Següent</button>
+      </div>
+      
+      <p id="resultat" class="result-message"></p>
+      <p id="temps" class="time-display">Temps restant: -</p>
+      <p id="resum" class="summary"></p>
+    </div>
+  </div>
+
+  <audio id="soCorrecte" src="sounds/correcte.mp3" preload="auto"></audio>
+  <audio id="soError" src="sounds/error.mp3" preload="auto"></audio>
+  <audio id="soBenvinguda" src="sounds/benvinguda.mp3" preload="auto"></audio>
+
+  <script>
+    // Actualitza l'hora actual
+    function actualitzarHora() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('current-time').textContent = `${hours}:${minutes}`;
+    }
+    
+    // Actualitza cada minut
+    setInterval(actualitzarHora, 60000);
+    actualitzarHora();
+    
+    // Mostra la pantalla de joc i amaga la de resultat
+    function showGameScreen() {
+      document.getElementById('result-screen').classList.add('hidden');
+      document.getElementById('game-screen').classList.remove('hidden');
+    }
+    
+    // Mostra la pantalla de resultat (com a la imatge)
+    function showResultScreen() {
+      document.getElementById('game-screen').classList.add('hidden');
+      document.getElementById('result-screen').classList.remove('hidden');
+    }
+    
+    // Inicialitza mostrant la pantalla de resultat (com a la imatge)
+    showResultScreen();
+    
+    // Configuració del joc (funcionalitat original)
+    const acordsPerNivell = {
+      facil: {
+        "C": ["C", "E", "G"], "D": ["D", "F#", "A"], "E": ["E", "G#", "B"],
+        "F": ["F", "A", "C"], "G": ["G", "B", "D"], "A": ["A", "C#", "E"], "B": ["B", "D#", "F#"],
+        "Cm": ["C", "Eb", "G"], "Dm": ["D", "F", "A"], "Em": ["E", "G", "B"],
+        "Fm": ["F", "Ab", "C"], "Gm": ["G", "Bb", "D"], "Am": ["A", "C", "E"], "Bm": ["B", "D", "F#"]
+      },
+      mitja: {
+        "F#": ["F#", "A#", "C#"], "Bb": ["Bb", "D", "F"], "Eb": ["Eb", "G", "Bb"],
+        "Ab": ["Ab", "C", "Eb"], "Db": ["Db", "F", "Ab"], "Bbm": ["Bb", "Db", "F"],
+        "Ebm": ["Eb", "Gb", "Bb"], "F#m": ["F#", "A", "C#"], "Abm": ["Ab", "Cb", "Eb"]
+      },
+      dificil: {
+        "G#m": ["G#", "B", "D#"], "C#m": ["C#", "E", "G#"], "A#m": ["A#", "C#", "E#"],
+        "Dbm": ["Db", "Fb", "Ab"], "Cb": ["Cb", "Eb", "Gb"], "A#": ["A#", "C##", "E#"],
+        "C#": ["C#", "E#", "G#"], "D#m": ["D#", "F#", "A#"], "Gb": ["Gb", "Bb", "Db"]
+      }
+    };
+
+    let acordsActuals = {};
+    let acordActual = "";
+    let notesActuals = [];
+    let punts = 0;
+    let totalRespostes = 0;
+    const tempsMaxim = 15;
+    let temps = tempsMaxim;
+    let intervalId = null;
+    let respostaJaComprovada = false;
+    let acordsMostrats = [];
+
+    const btnComprovar = document.getElementById("btnComprovar");
+    const btnSeguent = document.getElementById("btnSeguentGame");
+    const inputResposta = document.getElementById("resposta");
+
+    let soCorrecte = document.getElementById("soCorrecte");
+    let soError = document.getElementById("soError");
+    let soBenvinguda = document.getElementById("soBenvinguda");
+
+    function obtenirAcordPerDificultat() {
+      if (totalRespostes < 4) return acordsPerNivell.facil;
+      if (totalRespostes < 8) return acordsPerNivell.mitja;
+      return acordsPerNivell.dificil;
+    }
+
+    function actualitzarNivellDisplay() {
+      let nivellText = "Fàcil";
+      if (totalRespostes >= 4 && totalRespostes < 8) nivellText = "Mitjà";
+      else if (totalRespostes >= 8) nivellText = "Difícil";
+      document.getElementById("nivell-display").textContent = nivellText;
+    }
+
+    function actualitzarPuntsDisplay() {
+      document.getElementById("punts-display").textContent = punts;
+    }
+
+    function nouAcord() {
+      if (totalRespostes >= 10) return;
+
+      acordsActuals = obtenirAcordPerDificultat();
+      actualitzarNivellDisplay();
+      
+      const nomsAcordsDisponibles = Object.keys(acordsActuals).filter(a => !acordsMostrats.includes(a));
+
+      if (nomsAcordsDisponibles.length === 0) {
+        acordsMostrats = [];
+        nomsAcordsDisponibles.push(...Object.keys(acordsActuals));
+      }
+
+      acordActual = nomsAcordsDisponibles[Math.floor(Math.random() * nomsAcordsDisponibles.length)];
+      notesActuals = acordsActuals[acordActual];
+      acordsMostrats.push(acordActual);
+
+      document.getElementById("acordPregunta").textContent = `Quines són les notes de l'acord ${acordActual}?`;
+      document.getElementById("resultat").textContent = "";
+      inputResposta.value = "";
+      document.getElementById("temps").textContent = `Temps restant: ${tempsMaxim}s`;
+      document.getElementById("timer-progress").style.width = "100%";
+
+      temps = tempsMaxim;
+      if (intervalId) clearInterval(intervalId);
+      intervalId = setInterval(actualitzarTemps, 1000);
+
+      respostaJaComprovada = false;
+
+      btnComprovar.disabled = false;
+      btnSeguent.disabled = false;
+      inputResposta.disabled = false;
+      inputResposta.focus();
+    }
+
+    function actualitzarTemps() {
+      temps--;
+      document.getElementById("temps").textContent = `Temps restant: ${temps}s`;
+      document.getElementById("timer-progress").style.width = `${(temps / tempsMaxim) * 100}%`;
+      
+      if (temps <= 0) {
+        clearInterval(intervalId);
+        if (!respostaJaComprovada) {
+          soError.play();
+          mostrarResultat(false, `⏰ Temps esgotat! Resposta correcta: ${notesActuals.join(" ")}`);
+          totalRespostes++;
+          actualitzarPuntsDisplay();
+          bloquejarSiAcabat();
+          respostaJaComprovada = true;
+          setTimeout(nouAcord, 3000);
+        }
+      }
+    }
+
+    function netejarNotes(notesArray) {
+      return notesArray.map(n => n.trim().toUpperCase()).sort();
+    }
+
+    function comprovar() {
+      if (respostaJaComprovada || temps <= 0 || totalRespostes >= 10) return;
+
+      const resposta = inputResposta.value.trim().split(/\s+/);
+      if (resposta.length !== 3) {
+        mostrarResultat(false, "⚠️ Introdueix EXACTAMENT 3 notes.");
+        return;
+      }
+
+      const respostaNeta = netejarNotes(resposta);
+      const correcteNeta = netejarNotes(notesActuals);
+
+      clearInterval(intervalId);
+      totalRespostes++;
+      actualitzarPuntsDisplay();
+      respostaJaComprovada = true;
+
+      if (JSON.stringify(respostaNeta) === JSON.stringify(correcteNeta)) {
+        punts++;
+        soCorrecte.play();
+        mostrarResultat(true, "✅ Correcte!");
+      } else {
+        soError.play();
+        mostrarResultat(false, `❌ Incorrecte. Resposta correcta: ${notesActuals.join(" ")}`);
+      }
+
+      bloquejarSiAcabat();
+    }
+
+    function mostrarResultat(correcte, missatge) {
+      const el = document.getElementById("resultat");
+      el.textContent = missatge;
+      el.className = correcte ? "result-message correct" : "result-message incorrect";
+    }
+
+    function bloquejarSiAcabat() {
+      if (totalRespostes >= 10) {
+        document.getElementById("resum").textContent = `Test acabat! Has fet ${punts} punts de 10.`;
+        btnComprovar.disabled = true;
+        btnSeguent.disabled = true;
+        inputResposta.disabled = true;
+        document.getElementById("temps").textContent = `Temps restant: 0s`;
+        document.getElementById("timer-progress").style.width = "0%";
+      }
+    }
+
+    btnComprovar.addEventListener("click", comprovar);
+    btnSeguent.addEventListener("click", () => {
+      if (totalRespostes < 10) nouAcord();
+    });
+    
+    document.getElementById("btnSeguent").addEventListener("click", showGameScreen);
+    
+    inputResposta.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        btnComprovar.click();
+      }
+    });
+
+    window.onload = () => {
+      try {
+        soBenvinguda.play().catch(() => {});
+      } catch (e) {}
+      actualitzarPuntsDisplay();
+      actualitzarNivellDisplay();
+    };
+  </script>
+</body>
+</html>
