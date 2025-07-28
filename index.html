@@ -1,1 +1,418 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Entrenador d'Acords</title>
+  <style>
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif; /* Font similar a la de la imatge */
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      background-color: #1a1a2e; /* Fons general més fosc */
+      color: #e0e0e0; /* Color de text general clar */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box; /* Per evitar desbordaments amb padding/border */
+    }
+
+    .container {
+      background-color: #2a2a4c; /* Color del contenidor principal */
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); /* Ombra per profunditat */
+      width: 90%;
+      max-width: 500px;
+      margin: 20px auto; /* Centrar el contenidor i espai superior/inferior */
+      box-sizing: border-box; /* Per evitar desbordaments amb padding/border */
+    }
+
+    h1 {
+      font-size: 1.8em;
+      margin-bottom: 25px;
+      color: #e0e0e0;
+    }
+
+    /* Contenidor per Punts, Nivell i Barra de Progrés */
+    #top-info-container {
+        display: flex;
+        flex-wrap: wrap; /* Permetre que els elements es moguin a la següent línia si no hi ha espai */
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        font-size: 1.1em;
+        color: #e0e0e0;
+    }
+
+    #punts-nivell {
+        display: flex;
+        justify-content: flex-start; /* Alinear a l'esquerra */
+        align-items: center;
+        flex-grow: 1; /* Permetre que ocupi l'espai disponible */
+    }
+
+    #nivell {
+      margin-left: 20px; /* Espai entre punts i nivell */
+    }
+
+    #nivell-badge {
+      background-color: #e74c3c; /* Color vermell del badge de nivell */
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 0.9em;
+      margin-left: 10px;
+      white-space: nowrap; /* Evitar salt de línia en el badge */
+    }
+
+    #progress-container {
+      width: 100%;
+      height: 10px;
+      background-color: #3b3b64;
+      border-radius: 5px;
+      margin-top: 10px; /* Espai per sota de punts/nivell */
+      overflow: hidden; /* Per assegurar que la barra interior no es desbordi */
+    }
+
+    #progress-bar {
+      height: 100%;
+      width: 0%; /* S'actualitzarà amb JS */
+      background-color: #e74c3c; /* Color de la barra de progrés */
+      border-radius: 5px;
+      transition: width 0.3s ease-in-out; /* Animació suau */
+    }
+
+
+    #acordPregunta {
+      font-size: 2.2em; /* Mida més gran per la pregunta de l'acord */
+      margin-top: 30px; /* Més espai superior */
+      margin-bottom: 20px;
+      color: #e0e0e0;
+      font-weight: bold;
+    }
+
+    #resultat {
+      font-size: 1.1em;
+      margin-bottom: 15px;
+      height: 30px; /* Per mantenir l'espai i evitar salts quan apareix el missatge */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #resultat.correcte {
+      color: #2ecc71; /* Verd per correcte */
+    }
+
+    #resultat.error {
+      color: #e74c3c; /* Vermell per error */
+    }
+
+    #temps {
+      font-size: 1em;
+      color: #e74c3c; /* Vermell per indicar temps esgotat o temps restant */
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+
+    input {
+      padding: 15px;
+      width: 100%; /* Ocupa tot l'ample del contenidor */
+      max-width: 400px; /* Límits per a pantalles amples */
+      font-size: 1.1em;
+      margin-bottom: 20px;
+      box-sizing: border-box;
+      border: none;
+      border-radius: 8px;
+      background-color: #3b3b64; /* Color de fons de l'input */
+      color: #e0e0e0; /* Color del text de l'input */
+      text-align: center;
+    }
+
+    input::placeholder {
+      color: #9e9e9e; /* Color del placeholder */
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      max-width: 300px;
+      margin: 15px auto;
+      padding: 18px 0;
+      font-size: 1.2em;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      transition: background-color 0.3s ease;
+      font-weight: bold;
+    }
+
+    #btnComprovar {
+      background-color: #007bff; /* Blau per comprovar (no a la imatge, però mantinc el color original) */
+      color: white;
+    }
+
+    #btnSeguent {
+      background-color: #e74c3c; /* Vermell similar al de la imatge */
+      color: white;
+    }
+
+    button:hover:not(:disabled) {
+      opacity: 0.9;
+    }
+
+    button:disabled {
+      background-color: #555;
+      cursor: not-allowed;
+      color: #bbb;
+    }
+
+    #resum {
+      font-weight: bold;
+      margin-top: 20px;
+      font-size: 1.1em;
+      color: #e0e0e0;
+    }
+
+    audio {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>🎹 Endevina les notes de l'acord</h1>
+
+    <div id="top-info-container">
+        <div id="punts-nivell">
+            <p id="punts">Punts: 0</p>
+            <p id="nivell">Nivell: <span id="nivell-badge">Fàcil</span></p>
+        </div>
+        <div id="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+    </div>
+
+    <p id="acordPregunta">Carregant acord...</p>
+
+    <input type="text" id="resposta" placeholder="Ex: C E G" autocomplete="off" />
+
+    <button id="btnComprovar">Comprovar</button>
+    <button id="btnSeguent">Següent</button>
+
+    <p id="resultat"></p>
+    <p id="temps">Temps restant: -</p>
+    <p id="resum"></p>
+  </div>
+
+  <audio id="soCorrecte" src="sounds/correcte.mp3" preload="auto"></audio>
+  <audio id="soError" src="sounds/error.mp3" preload="auto"></audio>
+  <audio id="soBenvinguda" src="sounds/benvinguda.mp3" preload="auto"></audio>
+
+  <script>
+    const acordsPerNivell = {
+      facil: {
+        "C": ["C", "E", "G"], "D": ["D", "F#", "A"], "E": ["E", "G#", "B"],
+        "F": ["F", "A", "C"], "G": ["G", "B", "D"], "A": ["A", "C#", "E"], "B": ["B", "D#", "F#"],
+        "Cm": ["C", "Eb", "G"], "Dm": ["D", "F", "A"], "Em": ["E", "G", "B"],
+        "Fm": ["F", "Ab", "C"], "Gm": ["G", "Bb", "D"], "Am": ["A", "C", "E"], "Bm": ["B", "D", "F#"]
+      },
+      mitja: {
+        "F#": ["F#", "A#", "C#"], "Bb": ["Bb", "D", "F"], "Eb": ["Eb", "G", "Bb"],
+        "Ab": ["Ab", "C", "Eb"], "Db": ["Db", "F", "Ab"], "Bbm": ["Bb", "Db", "F"],
+        "Ebm": ["Eb", "Gb", "Bb"], "F#m": ["F#", "A", "C#"], "Abm": ["Ab", "Cb", "Eb"]
+      },
+      dificil: {
+        "G#m": ["G#", "B", "D#"], "C#m": ["C#", "E", "G#"], "A#m": ["A#", "C#", "E#"],
+        "Dbm": ["Db", "Fb", "Ab"], "Cb": ["Cb", "Eb", "Gb"], "A#": ["A#", "C##", "E#"],
+        "C#": ["C#", "E#", "G#"], "D#m": ["D#", "F#", "A#"], "Gb": ["Gb", "Bb", "Db"]
+      }
+    };
+
+    let acordsActuals = {};
+    let acordActual = "";
+    let notesActuals = [];
+    let punts = 0;
+    let totalRespostes = 0;
+    const tempsMaxim = 15;
+    let temps = tempsMaxim;
+    let intervalId = null;
+    let respostaJaComprovada = false;
+    let acordsMostrats = [];
+
+    const btnComprovar = document.getElementById("btnComprovar");
+    const btnSeguent = document.getElementById("btnSeguent");
+    const inputResposta = document.getElementById("resposta");
+
+    let soCorrecte = document.getElementById("soCorrecte");
+    let soError = document.getElementById("soError");
+    let soBenvinguda = document.getElementById("soBenvinguda");
+
+    // ELEMENTS HTML
+    const acordPreguntaEl = document.getElementById("acordPregunta");
+    const resultatEl = document.getElementById("resultat");
+    const puntsEl = document.getElementById("punts");
+    const tempsEl = document.getElementById("temps");
+    const resumEl = document.getElementById("resum");
+    const nivellBadgeEl = document.getElementById("nivell-badge"); // Nou element per al nivell
+    const progressBarEl = document.getElementById("progress-bar"); // Nou element per la barra de progrés
+
+
+    function obtenirAcordPerDificultat() {
+      let nivellText = "Fàcil"; // Default
+      if (totalRespostes < 4) {
+        nivellText = "Fàcil";
+        acordsActuals = acordsPerNivell.facil;
+      } else if (totalRespostes < 8) {
+        nivellText = "Mitjà";
+        acordsActuals = acordsPerNivell.mitja;
+      } else {
+        nivellText = "Difícil";
+        acordsActuals = acordsPerNivell.dificil;
+      }
+      nivellBadgeEl.textContent = nivellText; // Actualitzar el text del badge de nivell
+      return acordsActuals;
+    }
+
+    function nouAcord() {
+      if (totalRespostes >= 10) return;
+
+      acordsActuals = obtenirAcordPerDificultat();
+      const nomsAcordsDisponibles = Object.keys(acordsActuals).filter(a => !acordsMostrats.includes(a));
+
+      if (nomsAcordsDisponibles.length === 0) {
+        acordsMostrats = [];
+        nomsAcordsDisponibles.push(...Object.keys(acordsActuals));
+      }
+
+      acordActual = nomsAcordsDisponibles[Math.floor(Math.random() * nomsAcordsDisponibles.length)];
+      notesActuals = acordsActuals[acordActual];
+      acordsMostrats.push(acordActual);
+
+      acordPreguntaEl.textContent = `Quines són les notes de l'acord ${acordActual}?`;
+      resultatEl.textContent = "";
+      resultatEl.className = ""; // Neteja la classe per si hi havia 'correcte' o 'error'
+      inputResposta.value = "";
+      tempsEl.textContent = `Temps restant: ${tempsMaxim}s`;
+      progressBarEl.style.width = '100%'; // Reiniciar barra de progrés
+
+      temps = tempsMaxim;
+      if (intervalId) clearInterval(intervalId);
+      intervalId = setInterval(actualitzarTemps, 1000);
+
+      respostaJaComprovada = false;
+
+      btnComprovar.disabled = false;
+      btnSeguent.disabled = false;
+      inputResposta.disabled = false;
+      inputResposta.focus();
+    }
+
+    function actualitzarTemps() {
+      temps--;
+      tempsEl.textContent = `Temps restant: ${temps}s`;
+      progressBarEl.style.width = `${(temps / tempsMaxim) * 100}%`; // Actualitzar barra de progrés
+
+      if (temps <= 0) {
+        clearInterval(intervalId);
+        if (!respostaJaComprovada) {
+          soError.play();
+          mostrarResultat(false, `⏰ Temps esgotat! Resposta correcta: ${notesActuals.join(" ")}`);
+          totalRespostes++;
+          bloquejarSiAcabat();
+          respostaJaComprovada = true;
+          // IMPORTANT: Aquesta crida a setTimeout es queda, és part de la lògica original si el temps s'esgota.
+          setTimeout(nouAcord, 3000);
+        }
+      }
+    }
+
+    function netejarNotes(notesArray) {
+      return notesArray.map(n => n.trim().toUpperCase()).sort();
+    }
+
+    function comprovar() {
+      if (respostaJaComprovada || temps <= 0 || totalRespostes >= 10) return;
+
+      const resposta = inputResposta.value.trim().split(/\s+/);
+      if (resposta.length !== 3) {
+        mostrarResultat(false, "⚠️ Introdueix EXACTAMENT 3 notes.");
+        return;
+      }
+
+      const respostaNeta = netejarNotes(resposta);
+      const correcteNeta = netejarNotes(notesActuals);
+
+      clearInterval(intervalId);
+      totalRespostes++;
+      respostaJaComprovada = true;
+
+      if (JSON.stringify(respostaNeta) === JSON.stringify(correcteNeta)) {
+        punts++;
+        soCorrecte.play();
+        mostrarResultat(true, "✅ Correcte!");
+      } else {
+        soError.play();
+        mostrarResultat(false, `❌ Incorrecte. Resposta correcta: ${notesActuals.join(" ")}`);
+      }
+
+      bloquejarSiAcabat();
+    }
+
+    function mostrarResultat(correcte, missatge) {
+      resultatEl.textContent = missatge;
+      resultatEl.className = correcte ? "correcte" : "error";
+    }
+
+    function bloquejarSiAcabat() {
+      puntsEl.textContent = `Punts: ${punts}`;
+      if (totalRespostes >= 10) {
+        resumEl.textContent = `Test acabat! Has fet ${punts} punts de 10.`;
+        btnComprovar.disabled = true;
+        btnSeguent.disabled = true;
+        inputResposta.disabled = true;
+        tempsEl.textContent = `Temps restant: 0s`;
+        progressBarEl.style.width = '0%'; // Netejar barra al final
+      }
+    }
+
+    btnComprovar.addEventListener("click", comprovar);
+    btnSeguent.addEventListener("click", () => {
+      // Si encara no hem acabat totes les respostes
+      if (totalRespostes < 10) {
+        // Si no s'ha comprovat la resposta actual, es compta com a error abans de passar al següent acord
+        if (!respostaJaComprovada) {
+            clearInterval(intervalId); // Aturem el temporitzador
+            totalRespostes++; // Comptem com una resposta
+            soError.play(); // So d'error
+            mostrarResultat(false, `❌ Has saltat. Resposta correcta: ${notesActuals.join(" ")}`);
+            bloquejarSiAcabat(); // Actualitzem la UI d'acord al nou totalRespostes
+            // No necessitem un setTimeout aquí ja que 'nouAcord' ja es cridarà
+            // o el joc ja s'haurà acabat.
+        }
+        nouAcord(); // Sempre cridem nouAcord per avançar si no hem acabat
+      } else {
+        // Si ja hem acabat les 10 preguntes, cridem la funció de finalització
+        bloquejarSiAcabat();
+      }
+    });
+    inputResposta.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        btnComprovar.click();
+      }
+    });
+
+    window.onload = () => {
+      soBenvinguda.play().catch(() => {});
+      nouAcord();
+    };
+  </script>
+</body>
+</html>
 
