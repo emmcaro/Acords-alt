@@ -1,1 +1,119 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acords Musicals</title>
+    <style>
+        /* --- PALETA DE COLORS MODERNA --- */
+        :root {
+            --fons: #fafafa;
+            --text: #333333;
+            --accent: #6a1b9a; /* Lila elegant */
+            --bordo: #ffffff;
+            --ombra: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
 
+        /* --- TIPOGRAFIA PROFESSIONAL --- */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--fons);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--accent);
+            text-align: center;
+            margin-bottom: 2.5rem;
+            font-weight: 600;
+            font-size: 2.2rem;
+            letter-spacing: -0.5px;
+        }
+
+        /* --- TARGETES D'ACORDS MILLORADES --- */
+        .acord {
+            background: var(--bordo);
+            border-radius: 12px;
+            padding: 1.8rem;
+            margin-bottom: 1.8rem;
+            box-shadow: var(--ombra);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .acord:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .acord h2 {
+            color: var(--accent);
+            margin: 0 0 1rem 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .acord img {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+            border-radius: 8px;
+            display: block;
+            margin: 1.2rem auto;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .acord a {
+            display: inline-block;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 0.8rem;
+            border-bottom: 2px solid transparent;
+            transition: border-color 0.3s;
+        }
+
+        .acord a:hover {
+            border-bottom: 2px solid var(--accent);
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 600px) {
+            body {
+                padding: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .acord {
+                padding: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 👇 EL TEU CONTINGUT ORIGINAL (sense canvis) 👇 -->
+    <h1>Acords Musicals</h1>
+    
+    <div class="acord">
+        <h2>Do Major (C)</h2>
+        <img src="https://i.imgur.com/J0qkQ0a.png" alt="Acord de Do">
+        <a href="https://imgur.com/J0qkQ0a">Veure imatge completa</a>
+    </div>
+    
+    <div class="acord">
+        <h2>Re Major (D)</h2>
+        <img src="https://i.imgur.com/9ZqQY9y.png" alt="Acord de Re">
+        <a href="https://imgur.com/9ZqQY9y">Veure imatge completa</a>
+    </div>
+    
+    <!-- Afegeix més acords aquí -->
+</body>
+</html>
