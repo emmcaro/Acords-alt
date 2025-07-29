@@ -15,6 +15,7 @@
       --primary-text: #FFFFFF;
       --secondary-text: #A9B1D6;
       --accent-pink: #E04463;
+      --accent-green: #89d489;
       --input-border: #414868;
     }
 
@@ -41,7 +42,6 @@
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     }
     
-    /* ESTIL AFEGIT PER A LA CAPÇALERA */
     h1 {
       font-size: 1.3em;
       color: var(--primary-text);
@@ -71,12 +71,22 @@
     #resultat, #resum {
       font-weight: bold;
       font-size: 1.1em;
-      min-height: 25px; /* Per evitar que el layout salti */
+      min-height: 50px; /* Augmentem l'alçada per a les dues línies */
+      line-height: 1.4;
       color: var(--accent-pink);
       margin-bottom: 25px;
     }
     
+    /* NOU ESTIL per a la resposta correcta quan hi ha un error */
+    .resposta-correcta-error {
+        color: var(--accent-green);
+        font-size: 1.2em; /* Una mica més gran */
+        display: inline-block;
+        margin-top: 6px;
+    }
+
     #resum {
+        min-height: auto;
         color: var(--primary-text);
     }
 
@@ -118,7 +128,7 @@
     }
 
     button:disabled {
-      background-color: #5b6079; /* Un color de deshabilitat més integrat */
+      background-color: #5b6079;
       color: #9a9fb5;
       cursor: not-allowed;
     }
@@ -162,10 +172,10 @@
       mitja: {
         "F#": ["F#", "A#", "C#"], "Bb": ["Bb", "D", "F"], "Eb": ["Eb", "G", "Bb"],
         "Ab": ["Ab", "C", "Eb"], "Db": ["Db", "F", "Ab"], "Bbm": ["Bb", "Db", "F"],
-        "Ebm": ["Eb", "Gb", "Bb"], "F#m": ["F#", "A", "C#"], "Abm": ["Ab", "Cb", "Eb"],
+        "Ebm": ["Eb", "Gb", "Bb"], "F#m": ["F#", "A", "C#"], "Abm": ["Ab", "Cb", "Eb"]
       },
       dificil: {
-        "G#m": ["G#", "B", "D#"], "G#": ["G#", "B#", "D#"], "C#m": ["C#", "E", "G#"], "A#m": ["A#", "C#", "E#"],
+        "G#m": ["G#", "B", "D#"], "C#m": ["C#", "E", "G#"], "A#m": ["A#", "C#", "E#"],
         "Dbm": ["Db", "Fb", "Ab"], "Cb": ["Cb", "Eb", "Gb"], "A#": ["A#", "C##", "E#"],
         "C#": ["C#", "E#", "G#"], "D#m": ["D#", "F#", "A#"], "Gb": ["Gb", "Bb", "Db"]
       }
@@ -182,7 +192,6 @@
     let respostaJaComprovada = false;
     let acordsMostratsGlobal = [];
 
-    // Referències als elements del DOM
     const btnSeguent = document.getElementById("btnSeguent");
     const inputResposta = document.getElementById("resposta");
     const acordPreguntaEl = document.getElementById("acordPregunta");
@@ -203,30 +212,23 @@
 
     function nouAcord() {
       if (totalRespostes >= 10) return;
-
       acordsActuals = obtenirAcordPerDificultat();
       const nomsAcordsDisponibles = Object.keys(acordsActuals).filter(nom => !acordsMostratsGlobal.includes(nom));
-
       if (nomsAcordsDisponibles.length === 0) {
         acordsMostratsGlobal = acordsMostratsGlobal.filter(nom => !Object.keys(acordsActuals).includes(nom));
         nouAcord();
         return;
       }
-
       acordActual = nomsAcordsDisponibles[Math.floor(Math.random() * nomsAcordsDisponibles.length)];
       notesActuals = acordsActuals[acordActual];
       acordsMostratsGlobal.push(acordActual);
-
-      // Actualitzem la interfície
       acordPreguntaEl.textContent = `Acord de ${acordActual}`;
-      resultatEl.textContent = "";
+      resultatEl.innerHTML = "";
       inputResposta.value = "";
       tempsEl.textContent = `Temps: ${tempsMaxim}s`;
-
       temps = tempsMaxim;
       if (intervalId) clearInterval(intervalId);
       intervalId = setInterval(actualitzarTemps, 1000);
-
       respostaJaComprovada = false;
       btnSeguent.disabled = true;
       inputResposta.disabled = false;
@@ -240,7 +242,9 @@
         clearInterval(intervalId);
         if (!respostaJaComprovada) {
           soError.play();
-          mostrarResultat(false, `Temps esgotat! La resposta era: ${notesActuals.join(" ")}`);
+          // CANVI: Creem un missatge HTML per al resultat
+          const missatgeHtml = `Temps esgotat!<br><span class="resposta-correcta-error">${notesActuals.join(" ")}</span>`;
+          mostrarResultat(false, missatgeHtml);
           totalRespostes++;
           respostaJaComprovada = true;
           btnSeguent.disabled = false;
@@ -255,39 +259,38 @@
 
     function comprovar() {
       if (respostaJaComprovada || temps <= 0 || totalRespostes >= 10) return;
-
       const resposta = inputResposta.value.trim().split(/\s+/);
       if (resposta.length !== 3 && resposta[0] !== '') {
         mostrarResultat(false, "Introdueix 3 notes separades per espais.");
         return;
       } else if (resposta[0] === '') {
-        return; // No fer res si es prem Enter amb el camp buit
+        return;
       }
-
       const respostaNeta = netejarNotes(resposta);
       const correcteNeta = netejarNotes(notesActuals);
-
       clearInterval(intervalId);
       totalRespostes++;
       respostaJaComprovada = true;
-
       if (JSON.stringify(respostaNeta) === JSON.stringify(correcteNeta)) {
         punts++;
         soCorrecte.play();
         mostrarResultat(true, "Correcte!");
       } else {
         soError.play();
-        mostrarResultat(false, `Incorrecte. La resposta era: ${notesActuals.join(" ")}`);
+        // CANVI: Creem un missatge HTML per al resultat
+        const missatgeHtml = `Incorrecte.<br><span class="resposta-correcta-error">${notesActuals.join(" ")}</span>`;
+        mostrarResultat(false, missatgeHtml);
       }
-
       puntsEl.textContent = `Punts: ${punts}`;
       btnSeguent.disabled = false;
       bloquejarSiAcabat();
     }
 
     function mostrarResultat(correcte, missatge) {
-      resultatEl.textContent = missatge;
-      resultatEl.style.color = correcte ? "#89d489" : "var(--accent-pink)"; // Un verd més suau per 'correcte'
+      // CANVI: Utilitzem innerHTML per poder renderitzar les etiquetes
+      resultatEl.innerHTML = missatge;
+      // El color principal del missatge es defineix aquí
+      resultatEl.style.color = correcte ? "var(--accent-green)" : "var(--accent-pink)";
     }
 
     function bloquejarSiAcabat() {
