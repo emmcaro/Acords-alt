@@ -5,57 +5,114 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Entrenador d'Acords</title>
   <style>
+    /* Importem una tipografia més moderna semblant a la de la imatge */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+    /* Definim els colors principals del disseny per reutilitzar-los */
+    :root {
+      --bg-dark: #1C2135;
+      --card-bg: #2C344F;
+      --primary-text: #FFFFFF;
+      --secondary-text: #A9B1D6;
+      --accent-pink: #E04463;
+      --input-border: #414868;
+    }
+
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Inter', Arial, sans-serif;
       text-align: center;
-      margin: 20px;
+      margin: 0;
+      background-color: var(--bg-dark);
+      color: var(--secondary-text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
     }
 
-    h1 {
-      font-size: 1.6em;
-      margin-bottom: 20px;
+    .container {
+      background-color: var(--card-bg);
+      padding: 30px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .top-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      font-size: 0.9em;
     }
 
+    #punts, #temps {
+      margin: 0;
+    }
+    
     #acordPregunta {
-      font-size: 1.2em;
-      margin-bottom: 15px;
+      font-size: 2.5em;
+      font-weight: 900;
+      color: var(--primary-text);
+      margin: 0 0 25px 0;
+    }
+
+    #resultat, #resum {
+      font-weight: bold;
+      font-size: 1.1em;
+      min-height: 25px; /* Per evitar que el layout salti */
+      color: var(--accent-pink);
+      margin-bottom: 25px;
+    }
+    
+    #resum {
+        color: var(--primary-text);
     }
 
     input {
-      padding: 12px;
-      width: 90%;
-      max-width: 400px;
-      font-size: 18px;
-      margin-bottom: 15px;
+      padding: 18px;
+      width: 100%;
+      font-size: 1.1em;
+      margin-bottom: 20px;
       box-sizing: border-box;
+      background-color: var(--bg-dark);
+      border: 1px solid var(--input-border);
+      border-radius: 10px;
+      color: var(--primary-text);
+      text-align: center;
+    }
+    
+    input::placeholder {
+        color: var(--secondary-text);
+        opacity: 0.7;
     }
 
     button {
       display: block;
-      width: 90%;
-      max-width: 300px;
+      width: 100%;
       margin: 10px auto;
-      padding: 14px 0;
-      font-size: 18px;
+      padding: 18px 0;
+      font-size: 1.1em;
+      font-weight: bold;
       cursor: pointer;
       border: none;
-      background-color: #007bff;
-      color: white;
-      border-radius: 5px;
+      background-color: var(--accent-pink);
+      color: var(--primary-text);
+      border-radius: 10px;
+      transition: filter 0.2s;
+    }
+    
+    button:hover:not(:disabled) {
+        filter: brightness(1.1);
     }
 
     button:disabled {
-      background-color: #ccc;
+      background-color: #5b6079; /* Un color de deshabilitat més integrat */
+      color: #9a9fb5;
       cursor: not-allowed;
-    }
-
-    #resultat, #punts, #temps, #resum {
-      font-weight: bold;
-      margin-top: 15px;
-    }
-
-    #temps {
-      color: darkred;
     }
 
     audio {
@@ -64,16 +121,21 @@
   </style>
 </head>
 <body>
-  <h1>🎹 Endevina les notes de l'acord</h1>
-  <p id="acordPregunta">Carregant acord...</p>
 
-  <input type="text" id="resposta" placeholder="Ex: C E G" autocomplete="off" />
-  <button id="btnSeguent" disabled>Següent</button>
+  <div class="container">
+    <div class="top-info">
+        <p id="punts">Punts: 0</p>
+        <p id="temps">Temps: -</p>
+    </div>
 
-  <p id="resultat"></p>
-  <p id="punts">Punts: 0</p>
-  <p id="temps">Temps restant: -</p>
-  <p id="resum"></p>
+    <p id="acordPregunta">Carregant...</p>
+    <p id="resultat"></p>
+
+    <input type="text" id="resposta" placeholder="Ex: C E G" autocomplete="off" />
+    <button id="btnSeguent" disabled>Següent Acord</button>
+
+    <p id="resum"></p>
+  </div>
 
   <audio id="soCorrecte" src="sounds/correcte.mp3" preload="auto"></audio>
   <audio id="soError" src="sounds/error.mp3" preload="auto"></audio>
@@ -110,8 +172,14 @@
     let respostaJaComprovada = false;
     let acordsMostratsGlobal = [];
 
+    // Referències als elements del DOM
     const btnSeguent = document.getElementById("btnSeguent");
     const inputResposta = document.getElementById("resposta");
+    const acordPreguntaEl = document.getElementById("acordPregunta");
+    const resultatEl = document.getElementById("resultat");
+    const puntsEl = document.getElementById("punts");
+    const tempsEl = document.getElementById("temps");
+    const resumEl = document.getElementById("resum");
 
     const soCorrecte = document.getElementById("soCorrecte");
     const soError = document.getElementById("soError");
@@ -130,7 +198,6 @@
       const nomsAcordsDisponibles = Object.keys(acordsActuals).filter(nom => !acordsMostratsGlobal.includes(nom));
 
       if (nomsAcordsDisponibles.length === 0) {
-        // Si s'han esgotat, reinicia la llista per al nivell actual
         acordsMostratsGlobal = acordsMostratsGlobal.filter(nom => !Object.keys(acordsActuals).includes(nom));
         nouAcord();
         return;
@@ -140,10 +207,11 @@
       notesActuals = acordsActuals[acordActual];
       acordsMostratsGlobal.push(acordActual);
 
-      document.getElementById("acordPregunta").textContent = `Quines són les notes de l'acord ${acordActual}?`;
-      document.getElementById("resultat").textContent = "";
+      // Actualitzem la interfície
+      acordPreguntaEl.textContent = `Acord de ${acordActual}`;
+      resultatEl.textContent = "";
       inputResposta.value = "";
-      document.getElementById("temps").textContent = `Temps restant: ${tempsMaxim}s`;
+      tempsEl.textContent = `Temps: ${tempsMaxim}s`;
 
       temps = tempsMaxim;
       if (intervalId) clearInterval(intervalId);
@@ -157,12 +225,12 @@
 
     function actualitzarTemps() {
       temps--;
-      document.getElementById("temps").textContent = `Temps restant: ${temps}s`;
+      tempsEl.textContent = `Temps: ${temps}s`;
       if (temps <= 0) {
         clearInterval(intervalId);
         if (!respostaJaComprovada) {
           soError.play();
-          mostrarResultat(false, `⏰ Temps esgotat! Resposta correcta: ${notesActuals.join(" ")}`);
+          mostrarResultat(false, `Temps esgotat! La resposta era: ${notesActuals.join(" ")}`);
           totalRespostes++;
           respostaJaComprovada = true;
           btnSeguent.disabled = false;
@@ -179,9 +247,11 @@
       if (respostaJaComprovada || temps <= 0 || totalRespostes >= 10) return;
 
       const resposta = inputResposta.value.trim().split(/\s+/);
-      if (resposta.length !== 3) {
-        mostrarResultat(false, "⚠️ Introdueix EXACTAMENT 3 notes.");
+      if (resposta.length !== 3 && resposta[0] !== '') {
+        mostrarResultat(false, "Introdueix 3 notes separades per espais.");
         return;
+      } else if (resposta[0] === '') {
+        return; // No fer res si es prem Enter amb el camp buit
       }
 
       const respostaNeta = netejarNotes(resposta);
@@ -194,29 +264,28 @@
       if (JSON.stringify(respostaNeta) === JSON.stringify(correcteNeta)) {
         punts++;
         soCorrecte.play();
-        mostrarResultat(true, "✅ Correcte!");
+        mostrarResultat(true, "Correcte!");
       } else {
         soError.play();
-        mostrarResultat(false, `❌ Incorrecte. Resposta correcta: ${notesActuals.join(" ")}`);
+        mostrarResultat(false, `Incorrecte. La resposta era: ${notesActuals.join(" ")}`);
       }
 
+      puntsEl.textContent = `Punts: ${punts}`;
       btnSeguent.disabled = false;
       bloquejarSiAcabat();
     }
 
     function mostrarResultat(correcte, missatge) {
-      const el = document.getElementById("resultat");
-      el.textContent = missatge;
-      el.style.color = correcte ? "green" : "red";
+      resultatEl.textContent = missatge;
+      resultatEl.style.color = correcte ? "#89d489" : "var(--accent-pink)"; // Un verd més suau per 'correcte'
     }
 
     function bloquejarSiAcabat() {
-      document.getElementById("punts").textContent = `Punts: ${punts}`;
       if (totalRespostes >= 10) {
-        document.getElementById("resum").textContent = `Test acabat! Has fet ${punts} punts de 10.`;
+        resumEl.textContent = `Test acabat! Has fet ${punts} punts de 10.`;
         btnSeguent.disabled = true;
         inputResposta.disabled = true;
-        document.getElementById("temps").textContent = `Temps restant: 0s`;
+        tempsEl.textContent = "Temps: 0s";
       }
     }
 
