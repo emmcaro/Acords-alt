@@ -5,10 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Entrenador d'Acords</title>
   <style>
-    /* Importem una tipografia més moderna semblant a la de la imatge */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
 
-    /* Defineix els colors principals del disseny per reutilitzar-los */
     :root {
       --bg-dark: #1C2135;
       --card-bg: #2C344F;
@@ -71,16 +69,15 @@
     #resultat, #resum {
       font-weight: bold;
       font-size: 1.1em;
-      min-height: 50px; /* Augmentem l'alçada per a les dues línies */
+      min-height: 50px;
       line-height: 1.4;
       color: var(--accent-pink);
       margin-bottom: 25px;
     }
     
-    /* NOU ESTIL per a la resposta correcta quan hi ha un error */
     .resposta-correcta-error {
         color: var(--accent-green);
-        font-size: 1.2em; /* Una mica més gran */
+        font-size: 1.2em;
         display: inline-block;
         margin-top: 6px;
     }
@@ -175,17 +172,22 @@
         "Ebm": ["Eb", "Gb", "Bb"], "F#m": ["F#", "A", "C#"], "Abm": ["Ab", "Cb", "Eb"]
       },
       dificil: {
-        "G#m": ["G#", "B", "D#"], "C#m": ["C#", "E", "G#"], "A#m": ["A#", "C#", "E#"],
+        "G#m": ["G#", "B", "D#"], "G#": ["G#", "B#", "D#"], "C#m": ["C#", "E", "G#"], "A#m": ["A#", "C#", "E#"],
         "Dbm": ["Db", "Fb", "Ab"], "Cb": ["Cb", "Eb", "Gb"], "A#": ["A#", "C##", "E#"],
         "C#": ["C#", "E#", "G#"], "D#m": ["D#", "F#", "A#"], "Gb": ["Gb", "Bb", "Db"]
       }
     };
 
+    // --- NOVES VARIABLES PER CONTROLAR EL NIVELL ---
+    let nivellActualJoc = 'facil'; // Comencem en fàcil
+    let puntsNivellFacil = 0;
+    let puntsNivellMitja = 0;
+    
     let acordsActuals = {};
     let acordActual = "";
     let notesActuals = [];
-    let punts = 0;
-    let totalRespostes = 0;
+    let punts = 0; // Punts totals
+    let totalRespostes = 0; // Total d'intents
     const tempsMaxim = 15;
     let temps = tempsMaxim;
     let intervalId = null;
@@ -204,21 +206,32 @@
     const soError = document.getElementById("soError");
     const soBenvinguda = document.getElementById("soBenvinguda");
 
-    function obtenirAcordPerDificultat() {
-      if (totalRespostes < 4) return acordsPerNivell.facil;
-      if (totalRespostes < 8) return acordsPerNivell.mitja;
-      return acordsPerNivell.dificil;
+    // --- FUNCIÓ MODIFICADA PER OBTENIR ACORDS ---
+    function obtenirAcordsNivellActual() {
+      if (nivellActualJoc === 'facil') {
+        return acordsPerNivell.facil;
+      } else if (nivellActualJoc === 'mitja') {
+        return acordsPerNivell.mitja;
+      } else { // 'dificil'
+        return acordsPerNivell.dificil;
+      }
     }
 
     function nouAcord() {
-      if (totalRespostes >= 10) return;
-      acordsActuals = obtenirAcordPerDificultat();
+      if (totalRespostes >= 20) { // Augmentem el límit d'intents per donar marge
+        bloquejarSiAcabat();
+        return;
+      }
+
+      acordsActuals = obtenirAcordsNivellActual();
       const nomsAcordsDisponibles = Object.keys(acordsActuals).filter(nom => !acordsMostratsGlobal.includes(nom));
+      
       if (nomsAcordsDisponibles.length === 0) {
         acordsMostratsGlobal = acordsMostratsGlobal.filter(nom => !Object.keys(acordsActuals).includes(nom));
         nouAcord();
         return;
       }
+
       acordActual = nomsAcordsDisponibles[Math.floor(Math.random() * nomsAcordsDisponibles.length)];
       notesActuals = acordsActuals[acordActual];
       acordsMostratsGlobal.push(acordActual);
@@ -242,7 +255,6 @@
         clearInterval(intervalId);
         if (!respostaJaComprovada) {
           soError.play();
-          // CANVI: Creem un missatge HTML per al resultat
           const missatgeHtml = `Temps esgotat!<br><span class="resposta-correcta-error">${notesActuals.join(" ")}</span>`;
           mostrarResultat(false, missatgeHtml);
           totalRespostes++;
@@ -257,8 +269,9 @@
       return notesArray.map(n => n.trim().toUpperCase()).sort();
     }
 
+    // --- LÒGICA PRINCIPAL MODIFICADA A 'COMPROVAR' ---
     function comprovar() {
-      if (respostaJaComprovada || temps <= 0 || totalRespostes >= 10) return;
+      if (respostaJaComprovada || temps <= 0) return;
       const resposta = inputResposta.value.trim().split(/\s+/);
       if (resposta.length !== 3 && resposta[0] !== '') {
         mostrarResultat(false, "Introdueix 3 notes separades per espais.");
@@ -271,31 +284,49 @@
       clearInterval(intervalId);
       totalRespostes++;
       respostaJaComprovada = true;
+
       if (JSON.stringify(respostaNeta) === JSON.stringify(correcteNeta)) {
-        punts++;
+        punts++; // Sumem als punts totals
         soCorrecte.play();
-        mostrarResultat(true, "Correcte!");
+        let missatge = "Correcte!";
+        
+        // Comprovem i actualitzem el nivell del joc
+        if (nivellActualJoc === 'facil') {
+          puntsNivellFacil++;
+          if (puntsNivellFacil === 4) {
+            nivellActualJoc = 'mitja';
+            missatge = "Correcte! 🎉 Has pujat al nivell Mitjà!";
+          }
+        } else if (nivellActualJoc === 'mitja') {
+          puntsNivellMitja++;
+          if (puntsNivellMitja === 4) {
+            nivellActualJoc = 'dificil';
+            missatge = "Correcte! 🔥 Has pujat al nivell Difícil!";
+          }
+        }
+        
+        mostrarResultat(true, missatge);
+
       } else {
         soError.play();
-        // CANVI: Creem un missatge HTML per al resultat
         const missatgeHtml = `Incorrecte.<br><span class="resposta-correcta-error">${notesActuals.join(" ")}</span>`;
         mostrarResultat(false, missatgeHtml);
       }
+      
       puntsEl.textContent = `Punts: ${punts}`;
       btnSeguent.disabled = false;
       bloquejarSiAcabat();
     }
 
     function mostrarResultat(correcte, missatge) {
-      // CANVI: Utilitzem innerHTML per poder renderitzar les etiquetes
       resultatEl.innerHTML = missatge;
-      // El color principal del missatge es defineix aquí
       resultatEl.style.color = correcte ? "var(--accent-green)" : "var(--accent-pink)";
     }
 
     function bloquejarSiAcabat() {
-      if (totalRespostes >= 10) {
-        resumEl.textContent = `Test acabat! Has fet ${punts} punts de 10.`;
+        // Podem mantenir un límit d'intents o eliminar-lo si el joc només acaba quan es vulgui
+      if (totalRespostes >= 20) {
+        resumEl.textContent = `Joc acabat! Has fet ${punts} punts en ${totalRespostes} intents.`;
         btnSeguent.disabled = true;
         inputResposta.disabled = true;
         tempsEl.textContent = "Temps: 0s";
@@ -303,7 +334,7 @@
     }
 
     btnSeguent.addEventListener("click", () => {
-      if (totalRespostes < 10) nouAcord();
+       nouAcord();
     });
 
     inputResposta.addEventListener("keydown", (e) => {
