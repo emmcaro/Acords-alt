@@ -178,16 +178,15 @@
       }
     };
 
-    // --- NOVES VARIABLES PER CONTROLAR EL NIVELL ---
-    let nivellActualJoc = 'facil'; // Comencem en fàcil
+    let nivellActualJoc = 'facil';
     let puntsNivellFacil = 0;
     let puntsNivellMitja = 0;
     
     let acordsActuals = {};
     let acordActual = "";
     let notesActuals = [];
-    let punts = 0; // Punts totals
-    let totalRespostes = 0; // Total d'intents
+    let punts = 0;
+    let totalRespostes = 0;
     const tempsMaxim = 15;
     let temps = tempsMaxim;
     let intervalId = null;
@@ -206,19 +205,15 @@
     const soError = document.getElementById("soError");
     const soBenvinguda = document.getElementById("soBenvinguda");
 
-    // --- FUNCIÓ MODIFICADA PER OBTENIR ACORDS ---
     function obtenirAcordsNivellActual() {
-      if (nivellActualJoc === 'facil') {
-        return acordsPerNivell.facil;
-      } else if (nivellActualJoc === 'mitja') {
-        return acordsPerNivell.mitja;
-      } else { // 'dificil'
-        return acordsPerNivell.dificil;
-      }
+      if (nivellActualJoc === 'facil') return acordsPerNivell.facil;
+      if (nivellActualJoc === 'mitja') return acordsPerNivell.mitja;
+      return acordsPerNivell.dificil;
     }
 
     function nouAcord() {
-      if (totalRespostes >= 20) { // Augmentem el límit d'intents per donar marge
+      // Comprovem el límit de 10 preguntes aquí
+      if (totalRespostes >= 10) {
         bloquejarSiAcabat();
         return;
       }
@@ -269,7 +264,6 @@
       return notesArray.map(n => n.trim().toUpperCase()).sort();
     }
 
-    // --- LÒGICA PRINCIPAL MODIFICADA A 'COMPROVAR' ---
     function comprovar() {
       if (respostaJaComprovada || temps <= 0) return;
       const resposta = inputResposta.value.trim().split(/\s+/);
@@ -286,11 +280,10 @@
       respostaJaComprovada = true;
 
       if (JSON.stringify(respostaNeta) === JSON.stringify(correcteNeta)) {
-        punts++; // Sumem als punts totals
+        punts++;
         soCorrecte.play();
         let missatge = "Correcte!";
         
-        // Comprovem i actualitzem el nivell del joc
         if (nivellActualJoc === 'facil') {
           puntsNivellFacil++;
           if (puntsNivellFacil === 4) {
@@ -324,11 +317,12 @@
     }
 
     function bloquejarSiAcabat() {
-        // Podem mantenir un límit d'intents o eliminar-lo si el joc només acaba quan es vulgui
-      if (totalRespostes >= 20) {
-        resumEl.textContent = `Joc acabat! Has fet ${punts} punts en ${totalRespostes} intents.`;
+      // El joc s'acaba quan totalRespostes arriba a 10
+      if (totalRespostes >= 10) {
+        resumEl.textContent = `Test acabat! Has fet ${punts} punts de 10.`;
         btnSeguent.disabled = true;
         inputResposta.disabled = true;
+        if(intervalId) clearInterval(intervalId); // Aturem el temps per si de cas
         tempsEl.textContent = "Temps: 0s";
       }
     }
