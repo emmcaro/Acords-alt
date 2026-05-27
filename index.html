@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Entrenador d'Acords</title>
+  <title>Entrenador d'Acords (Veu)</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
 
@@ -55,10 +55,6 @@
       font-size: 0.9em;
     }
 
-    #punts, #temps {
-      margin: 0;
-    }
-    
     #acordPregunta {
       font-size: 2.5em;
       font-weight: 900;
@@ -66,7 +62,7 @@
       margin: 0 0 25px 0;
     }
 
-    #resultat, #resum {
+    #resultat {
       font-weight: bold;
       font-size: 1.1em;
       min-height: 50px;
@@ -82,16 +78,11 @@
         margin-top: 6px;
     }
 
-    #resum {
-        min-height: auto;
-        color: var(--primary-text);
-    }
-
     input {
       padding: 18px;
       width: 100%;
       font-size: 1.1em;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
       box-sizing: border-box;
       background-color: var(--bg-dark);
       border: 1px solid var(--input-border);
@@ -99,10 +90,22 @@
       color: var(--primary-text);
       text-align: center;
     }
-    
-    input::placeholder {
-        color: var(--secondary-text);
-        opacity: 0.7;
+
+    /* Botó de veu */
+    #btnVeu {
+      background-color: #414868;
+      margin-bottom: 20px;
+      font-size: 0.9em;
+    }
+    #btnVeu.escoltant {
+      background-color: var(--accent-green);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
     }
 
     button {
@@ -130,15 +133,13 @@
       cursor: not-allowed;
     }
 
-    audio {
-      display: none;
-    }
+    audio { display: none; }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <h1>🎹 Indica les notes de l'acord</h1>
+    <h1>🎹 Digues les notes de l'acord</h1>
 
     <div class="top-info">
         <p id="punts">Punts: 0</p>
@@ -148,7 +149,9 @@
     <p id="acordPregunta">Carregant...</p>
     <p id="resultat"></p>
 
-    <input type="text" id="resposta" placeholder="Ex: C E G" autocomplete="off" />
+    <input type="text" id="resposta" placeholder="C E G o digues 'Do Mi Sol'" autocomplete="off" />
+    
+    <button id="btnVeu">🎤 Clica per parlar</button>
     <button id="btnSeguent" disabled>Següent Acord</button>
 
     <p id="resum"></p>
@@ -160,50 +163,71 @@
 
   <script>
     const acordsPerNivell = {
-      facil: {
-        "C": ["C", "E", "G"], "D": ["D", "F#", "A"], "E": ["E", "G#", "B"],
-        "F": ["F", "A", "C"], "G": ["G", "B", "D"], "A": ["A", "C#", "E"], "B": ["B", "D#", "F#"],
-        "Cm": ["C", "Eb", "G"], "Dm": ["D", "F", "A"], "Em": ["E", "G", "B"],
-        "Fm": ["F", "Ab", "C"], "Gm": ["G", "Bb", "D"], "Am": ["A", "C", "E"], "Bm": ["B", "D", "F#"]
-      },
-      mitja: {
-        "F#": ["F#", "A#", "C#"], "Bb": ["Bb", "D", "F"], "Eb": ["Eb", "G", "Bb"],
-        "Ab": ["Ab", "C", "Eb"], "Db": ["Db", "F", "Ab"], "Bbm": ["Bb", "Db", "F"],
-        "Ebm": ["Eb", "Gb", "Bb"], "F#m": ["F#", "A", "C#"], "Abm": ["Ab", "Cb", "Eb"]
-      },
-      dificil: {
-        "G#m": ["G#", "B", "D#"], "G#": ["G#", "B#", "D#"],"C#m": ["C#", "E", "G#"], "A#m": ["A#", "C#", "E#"],
-        "Dbm": ["Db", "Fb", "Ab"], "Cb": ["Cb", "Eb", "Gb"], "A#": ["A#", "C##", "E#"],
-        "C#": ["C#", "E#", "G#"], "D#m": ["D#", "F#", "A#"], "Gb": ["Gb", "Bb", "Db"]
-      }
+      facil: { "C": ["C", "E", "G"], "D": ["D", "F#", "A"], "E": ["E", "G#", "B"], "F": ["F", "A", "C"], "G": ["G", "B", "D"], "A": ["A", "C#", "E"], "B": ["B", "D#", "F#"], "Cm": ["C", "Eb", "G"], "Dm": ["D", "F", "A"], "Em": ["E", "G", "B"], "Fm": ["F", "Ab", "C"], "Gm": ["G", "Bb", "D"], "Am": ["A", "C", "E"], "Bm": ["B", "D", "F#"] },
+      mitja: { "F#": ["F#", "A#", "C#"], "Bb": ["Bb", "D", "F"], "Eb": ["Eb", "G", "Bb"], "Ab": ["Ab", "C", "Eb"], "Db": ["Db", "F", "Ab"], "Bbm": ["Bb", "Db", "F"], "Ebm": ["Eb", "Gb", "Bb"], "F#m": ["F#", "A", "C#"], "Abm": ["Ab", "Cb", "Eb"] },
+      dificil: { "G#m": ["G#", "B", "D#"], "G#": ["G#", "B#", "D#"],"C#m": ["C#", "E", "G#"], "A#m": ["A#", "C#", "E#"], "Dbm": ["Db", "Fb", "Ab"], "Cb": ["Cb", "Eb", "Gb"], "A#": ["A#", "C##", "E#"], "C#": ["C#", "E#", "G#"], "D#m": ["D#", "F#", "A#"], "Gb": ["Gb", "Bb", "Db"] }
     };
 
-    let nivellActualJoc = 'facil';
-    let puntsNivellFacil = 0;
-    let puntsNivellMitja = 0;
-    
-    let acordsActuals = {};
-    let acordActual = "";
-    let notesActuals = [];
-    let punts = 0;
-    let totalRespostes = 0;
+    // Diccionari per traduir veu a notació internacional
+    const diccionariNotes = {
+      'do': 'C', 're': 'D', 'mi': 'E', 'fa': 'F', 'sol': 'G', 'la': 'A', 'si': 'B',
+      'sostingut': '#', 'diesi': '#', 'bemoll': 'b', 'bemol': 'b'
+    };
+
+    let nivellActualJoc = 'facil', puntsNivellFacil = 0, puntsNivellMitja = 0;
+    let acordsActuals = {}, acordActual = "", notesActuals = [], punts = 0, totalRespostes = 0;
     const tempsMaxim = 15;
-    let temps = tempsMaxim;
-    let intervalId = null;
-    let respostaJaComprovada = false;
-    let acordsMostratsGlobal = [];
+    let temps = tempsMaxim, intervalId = null, respostaJaComprovada = false, acordsMostratsGlobal = [];
 
     const btnSeguent = document.getElementById("btnSeguent");
+    const btnVeu = document.getElementById("btnVeu");
     const inputResposta = document.getElementById("resposta");
     const acordPreguntaEl = document.getElementById("acordPregunta");
     const resultatEl = document.getElementById("resultat");
     const puntsEl = document.getElementById("punts");
     const tempsEl = document.getElementById("temps");
     const resumEl = document.getElementById("resum");
+    const soCorrecte = document.getElementById("soCorrecte"), soError = document.getElementById("soError"), soBenvinguda = document.getElementById("soBenvinguda");
 
-    const soCorrecte = document.getElementById("soCorrecte");
-    const soError = document.getElementById("soError");
-    const soBenvinguda = document.getElementById("soBenvinguda");
+    // CONFIGURACIÓ RECONEIXEMENT DE VEU
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.lang = 'ca-ES'; 
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      recognition.onstart = () => { btnVeu.textContent = "Escoltant..."; btnVeu.classList.add("escoltant"); };
+      recognition.onend = () => { btnVeu.textContent = "🎤 Clica per parlar"; btnVeu.classList.remove("escoltant"); };
+      
+      recognition.onresult = (event) => {
+        const textEscoltat = event.results[0][0].transcript.toLowerCase();
+        inputResposta.value = traduirVeuANotes(textEscoltat);
+        comprovar();
+      };
+    }
+
+    function traduirVeuANotes(veu) {
+      // Netegem el text de paraules sobreres
+      let paraules = veu.replace(/ i /g, " ").split(/\s+/);
+      let notesResultat = [];
+      let notaAcumulada = "";
+
+      paraules.forEach(p => {
+        if (diccionariNotes[p]) {
+          let valor = diccionariNotes[p];
+          if (valor === '#' || valor === 'b') {
+            if (notesResultat.length > 0) {
+              notesResultat[notesResultat.length - 1] += valor;
+            }
+          } else {
+            notesResultat.push(valor);
+          }
+        }
+      });
+      return notesResultat.join(" ");
+    }
 
     function obtenirAcordsNivellActual() {
       if (nivellActualJoc === 'facil') return acordsPerNivell.facil;
@@ -212,29 +236,21 @@
     }
 
     function nouAcord() {
-      // Comprovem el límit de 10 preguntes aquí
-      if (totalRespostes >= 10) {
-        bloquejarSiAcabat();
-        return;
-      }
-
+      if (totalRespostes >= 10) { bloquejarSiAcabat(); return; }
       acordsActuals = obtenirAcordsNivellActual();
       const nomsAcordsDisponibles = Object.keys(acordsActuals).filter(nom => !acordsMostratsGlobal.includes(nom));
-      
       if (nomsAcordsDisponibles.length === 0) {
         acordsMostratsGlobal = acordsMostratsGlobal.filter(nom => !Object.keys(acordsActuals).includes(nom));
-        nouAcord();
-        return;
+        nouAcord(); return;
       }
-
       acordActual = nomsAcordsDisponibles[Math.floor(Math.random() * nomsAcordsDisponibles.length)];
       notesActuals = acordsActuals[acordActual];
       acordsMostratsGlobal.push(acordActual);
       acordPreguntaEl.textContent = `Acord de ${acordActual}`;
       resultatEl.innerHTML = "";
       inputResposta.value = "";
-      tempsEl.textContent = `Temps: ${tempsMaxim}s`;
       temps = tempsMaxim;
+      tempsEl.textContent = `Temps: ${temps}s`;
       if (intervalId) clearInterval(intervalId);
       intervalId = setInterval(actualitzarTemps, 1000);
       respostaJaComprovada = false;
@@ -250,8 +266,7 @@
         clearInterval(intervalId);
         if (!respostaJaComprovada) {
           soError.play();
-          const missatgeHtml = `Temps esgotat!<br><span class="resposta-correcta-error">${notesActuals.join(" ")}</span>`;
-          mostrarResultat(false, missatgeHtml);
+          mostrarResultat(false, `Temps esgotat!<br><span class="resposta-correcta-error">${notesActuals.join(" ")}</span>`);
           totalRespostes++;
           respostaJaComprovada = true;
           btnSeguent.disabled = false;
@@ -268,11 +283,10 @@
       if (respostaJaComprovada || temps <= 0) return;
       const resposta = inputResposta.value.trim().split(/\s+/);
       if (resposta.length !== 3 && resposta[0] !== '') {
-        mostrarResultat(false, "Introdueix 3 notes separades per espais.");
+        mostrarResultat(false, "S'esperen 3 notes.");
         return;
-      } else if (resposta[0] === '') {
-        return;
-      }
+      } else if (resposta[0] === '') return;
+
       const respostaNeta = netejarNotes(resposta);
       const correcteNeta = netejarNotes(notesActuals);
       clearInterval(intervalId);
@@ -282,30 +296,14 @@
       if (JSON.stringify(respostaNeta) === JSON.stringify(correcteNeta)) {
         punts++;
         soCorrecte.play();
-        let missatge = "Correcte!";
-        
-        if (nivellActualJoc === 'facil') {
-          puntsNivellFacil++;
-          if (puntsNivellFacil === 4) {
-            nivellActualJoc = 'mitja';
-            missatge = "Correcte! 🎉 Has pujat al nivell Mitjà!";
-          }
-        } else if (nivellActualJoc === 'mitja') {
-          puntsNivellMitja++;
-          if (puntsNivellMitja === 4) {
-            nivellActualJoc = 'dificil';
-            missatge = "Correcte! 🔥 Has pujat al nivell Difícil!";
-          }
-        }
-        
-        mostrarResultat(true, missatge);
-
+        let msg = "Correcte!";
+        if (nivellActualJoc === 'facil' && ++puntsNivellFacil === 4) { nivellActualJoc = 'mitja'; msg = "Correcte! 🎉 Nivell Mitjà!"; }
+        else if (nivellActualJoc === 'mitja' && ++puntsNivellMitja === 4) { nivellActualJoc = 'dificil'; msg = "Correcte! 🔥 Nivell Difícil!"; }
+        mostrarResultat(true, msg);
       } else {
         soError.play();
-        const missatgeHtml = `Incorrecte.<br><span class="resposta-correcta-error">${notesActuals.join(" ")}</span>`;
-        mostrarResultat(false, missatgeHtml);
+        mostrarResultat(false, `Incorrecte.<br><span class="resposta-correcta-error">${notesActuals.join(" ")}</span>`);
       }
-      
       puntsEl.textContent = `Punts: ${punts}`;
       btnSeguent.disabled = false;
       bloquejarSiAcabat();
@@ -317,31 +315,21 @@
     }
 
     function bloquejarSiAcabat() {
-      // El joc s'acaba quan totalRespostes arriba a 10
       if (totalRespostes >= 10) {
-        resumEl.textContent = `Test acabat! Has fet ${punts} punts de 10.`;
+        resumEl.textContent = `Test acabat! Punts: ${punts}/10.`;
         btnSeguent.disabled = true;
         inputResposta.disabled = true;
-        if(intervalId) clearInterval(intervalId); // Aturem el temps per si de cas
-        tempsEl.textContent = "Temps: 0s";
+        btnVeu.disabled = true;
+        if(intervalId) clearInterval(intervalId);
+        tempsEl.textContent = "Fi";
       }
     }
 
-    btnSeguent.addEventListener("click", () => {
-       nouAcord();
-    });
+    btnSeguent.addEventListener("click", nouAcord);
+    btnVeu.addEventListener("click", () => { if(recognition) recognition.start(); });
+    inputResposta.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); comprovar(); } });
 
-    inputResposta.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        comprovar();
-      }
-    });
-
-    window.onload = () => {
-      soBenvinguda.play().catch(() => {});
-      nouAcord();
-    };
+    window.onload = () => { soBenvinguda.play().catch(() => {}); nouAcord(); };
   </script>
 </body>
 </html>
