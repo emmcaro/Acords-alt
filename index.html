@@ -27,70 +27,59 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      padding: 20px;
+      padding: 15px;
       box-sizing: border-box;
     }
 
     .container {
       background-color: var(--card-bg);
-      padding: 30px;
+      padding: 25px;
       border-radius: 20px;
       width: 100%;
-      max-width: 400px;
+      max-width: 450px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     }
     
     h1 {
-      font-size: 1.3em;
+      font-size: 1.2em;
       color: var(--primary-text);
       font-weight: 700;
-      margin: 0 0 25px 0;
+      margin: 0 0 20px 0;
     }
 
     .top-info {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30px;
+      margin-bottom: 15px;
       font-size: 0.9em;
     }
 
-    #punts, #temps {
-      margin: 0;
-    }
-    
     #acordPregunta {
       font-size: 2.5em;
       font-weight: 900;
       color: var(--primary-text);
-      margin: 0 0 25px 0;
+      margin: 0 0 15px 0;
     }
 
-    #resultat, #resum {
+    #resultat {
       font-weight: bold;
       font-size: 1.1em;
       min-height: 50px;
       line-height: 1.4;
-      color: var(--accent-pink);
-      margin-bottom: 25px;
+      margin-bottom: 15px;
     }
     
     .resposta-correcta-error {
         color: var(--accent-green);
         font-size: 1.2em;
-        display: inline-block;
-        margin-top: 6px;
-    }
-
-    #resum {
-        min-height: auto;
-        color: var(--primary-text);
+        display: block;
+        margin-top: 4px;
     }
 
     input {
-      padding: 18px;
+      padding: 15px;
       width: 100%;
-      font-size: 1.1em;
+      font-size: 1.3em;
       margin-bottom: 20px;
       box-sizing: border-box;
       background-color: var(--bg-dark);
@@ -98,17 +87,55 @@
       border-radius: 10px;
       color: var(--primary-text);
       text-align: center;
-    }
-    
-    input::placeholder {
-        color: var(--secondary-text);
-        opacity: 0.7;
+      letter-spacing: 3px;
+      font-weight: bold;
     }
 
-    button {
+    /* TECLAT ORGANITZAT PER FILES */
+    .teclat-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+
+    .fila-notes {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+
+    .fila-accions {
+      display: grid;
+      grid-template-columns: 0.8fr 0.8fr 1.2fr 1.2fr;
+      gap: 10px;
+    }
+
+    .btn-teclat {
+      background-color: #414868;
+      color: white;
+      border: none;
+      padding: 12px 2px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.95em;
+      transition: background 0.1s, transform 0.1s;
+    }
+
+    .fila-notes .btn-teclat {
+      font-size: 0.85em; /* Una mica més petit perquè càpiguen els 7 */
+    }
+
+    .btn-mod { background-color: #565f89; font-size: 1.2em; }
+    .btn-del { background-color: #3b4261; }
+    .btn-ok { background-color: var(--accent-green); color: #1c2135; }
+
+    .btn-teclat:active { transform: scale(0.92); filter: brightness(1.2); }
+
+    button#btnSeguent {
       display: block;
       width: 100%;
-      margin: 10px auto;
       padding: 18px 0;
       font-size: 1.1em;
       font-weight: bold;
@@ -117,11 +144,6 @@
       background-color: var(--accent-pink);
       color: var(--primary-text);
       border-radius: 10px;
-      transition: filter 0.2s;
-    }
-    
-    button:hover:not(:disabled) {
-        filter: brightness(1.1);
     }
 
     button:disabled {
@@ -130,15 +152,13 @@
       cursor: not-allowed;
     }
 
-    audio {
-      display: none;
-    }
+    audio { display: none; }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <h1>🎹 Indica les notes de l'acord</h1>
+    <h1>🎹 Entrenador d'Acords</h1>
 
     <div class="top-info">
         <p id="punts">Punts: 0</p>
@@ -146,11 +166,30 @@
     </div>
 
     <p id="acordPregunta">Carregant...</p>
-    <p id="resultat"></p>
+    <div id="resultat"></div>
 
-    <input type="text" id="resposta" placeholder="Ex: C E G" autocomplete="off" />
+    <input type="text" id="resposta" placeholder="---" readonly />
+
+    <div class="teclat-container">
+      <div class="fila-notes">
+        <button class="btn-teclat" onclick="premerNota('C')">Do</button>
+        <button class="btn-teclat" onclick="premerNota('D')">Re</button>
+        <button class="btn-teclat" onclick="premerNota('E')">Mi</button>
+        <button class="btn-teclat" onclick="premerNota('F')">Fa</button>
+        <button class="btn-teclat" onclick="premerNota('G')">Sol</button>
+        <button class="btn-teclat" onclick="premerNota('A')">La</button>
+        <button class="btn-teclat" onclick="premerNota('B')">Si</button>
+      </div>
+
+      <div class="fila-accions">
+        <button class="btn-teclat btn-mod" onclick="premerMod('#')">#</button>
+        <button class="btn-teclat btn-mod" onclick="premerMod('b')">b</button>
+        <button class="btn-teclat btn-del" onclick="esborrar()">Esborrar</button>
+        <button class="btn-teclat btn-ok" onclick="comprovar()">OK</button>
+      </div>
+    </div>
+
     <button id="btnSeguent" disabled>Següent Acord</button>
-
     <p id="resum"></p>
   </div>
 
@@ -160,98 +199,78 @@
 
   <script>
     const acordsPerNivell = {
-      facil: {
-        "C": ["C", "E", "G"], "D": ["D", "F#", "A"], "E": ["E", "G#", "B"],
-        "F": ["F", "A", "C"], "G": ["G", "B", "D"], "A": ["A", "C#", "E"], "B": ["B", "D#", "F#"],
-        "Cm": ["C", "Eb", "G"], "Dm": ["D", "F", "A"], "Em": ["E", "G", "B"],
-        "Fm": ["F", "Ab", "C"], "Gm": ["G", "Bb", "D"], "Am": ["A", "C", "E"], "Bm": ["B", "D", "F#"]
-      },
-      mitja: {
-        "F#": ["F#", "A#", "C#"], "Bb": ["Bb", "D", "F"], "Eb": ["Eb", "G", "Bb"],
-        "Ab": ["Ab", "C", "Eb"], "Db": ["Db", "F", "Ab"], "Bbm": ["Bb", "Db", "F"],
-        "Ebm": ["Eb", "Gb", "Bb"], "F#m": ["F#", "A", "C#"], "Abm": ["Ab", "Cb", "Eb"]
-      },
-      dificil: {
-        "G#m": ["G#", "B", "D#"], "G#": ["G#", "B#", "D#"],"C#m": ["C#", "E", "G#"], "A#m": ["A#", "C#", "E#"],
-        "Dbm": ["Db", "Fb", "Ab"], "Cb": ["Cb", "Eb", "Gb"], "A#": ["A#", "C##", "E#"],
-        "C#": ["C#", "E#", "G#"], "D#m": ["D#", "F#", "A#"], "Gb": ["Gb", "Bb", "Db"]
-      }
+      facil: { "C": ["C", "E", "G"], "D": ["D", "F#", "A"], "E": ["E", "G#", "B"], "F": ["F", "A", "C"], "G": ["G", "B", "D"], "A": ["A", "C#", "E"], "B": ["B", "D#", "F#"], "Cm": ["C", "Eb", "G"], "Dm": ["D", "F", "A"], "Em": ["E", "G", "B"], "Fm": ["F", "Ab", "C"], "Gm": ["G", "Bb", "D"], "Am": ["A", "C", "E"], "Bm": ["B", "D", "F#"] },
+      mitja: { "F#": ["F#", "A#", "C#"], "Bb": ["Bb", "D", "F"], "Eb": ["Eb", "G", "Bb"], "Ab": ["Ab", "C", "Eb"], "Db": ["Db", "F", "Ab"], "Bbm": ["Bb", "Db", "F"], "Ebm": ["Eb", "Gb", "Bb"], "F#m": ["F#", "A", "C#"], "Abm": ["Ab", "Cb", "Eb"] },
+      dificil: { "G#m": ["G#", "B", "D#"], "G#": ["G#", "B#", "D#"],"C#m": ["C#", "E", "G#"], "A#m": ["A#", "C#", "E#"], "Dbm": ["Db", "Fb", "Ab"], "Cb": ["Cb", "Eb", "Gb"], "A#": ["A#", "C##", "E#"], "C#": ["C#", "E#", "G#"], "D#m": ["D#", "F#", "A#"], "Gb": ["Gb", "Bb", "Db"] }
     };
 
-    let nivellActualJoc = 'facil';
-    let puntsNivellFacil = 0;
-    let puntsNivellMitja = 0;
-    
-    let acordsActuals = {};
-    let acordActual = "";
-    let notesActuals = [];
-    let punts = 0;
-    let totalRespostes = 0;
+    let nivellActualJoc = 'facil', puntsNivellFacil = 0, puntsNivellMitja = 0;
+    let acordActual = "", notesActuals = [], punts = 0, totalRespostes = 0;
     const tempsMaxim = 15;
-    let temps = tempsMaxim;
-    let intervalId = null;
-    let respostaJaComprovada = false;
-    let acordsMostratsGlobal = [];
+    let temps = tempsMaxim, intervalId = null, respostaJaComprovada = false, acordsMostratsGlobal = [];
+    let llistaNotesEntrades = [];
 
     const btnSeguent = document.getElementById("btnSeguent");
     const inputResposta = document.getElementById("resposta");
-    const acordPreguntaEl = document.getElementById("acordPregunta");
     const resultatEl = document.getElementById("resultat");
-    const puntsEl = document.getElementById("punts");
-    const tempsEl = document.getElementById("temps");
-    const resumEl = document.getElementById("resum");
 
-    const soCorrecte = document.getElementById("soCorrecte");
-    const soError = document.getElementById("soError");
-    const soBenvinguda = document.getElementById("soBenvinguda");
+    function premerNota(nota) {
+      if (respostaJaComprovada || llistaNotesEntrades.length >= 3) return;
+      llistaNotesEntrades.push(nota);
+      actualitzarInput();
+    }
 
-    function obtenirAcordsNivellActual() {
-      if (nivellActualJoc === 'facil') return acordsPerNivell.facil;
-      if (nivellActualJoc === 'mitja') return acordsPerNivell.mitja;
-      return acordsPerNivell.dificil;
+    function premerMod(mod) {
+      if (respostaJaComprovada || llistaNotesEntrades.length === 0) return;
+      let ultimaIdx = llistaNotesEntrades.length - 1;
+      if (!llistaNotesEntrades[ultimaIdx].includes('#') && !llistaNotesEntrades[ultimaIdx].includes('b')) {
+        llistaNotesEntrades[ultimaIdx] += mod;
+        actualitzarInput();
+      }
+    }
+
+    function esborrar() {
+      if (respostaJaComprovada) return;
+      llistaNotesEntrades.pop();
+      actualitzarInput();
+    }
+
+    function actualitzarInput() {
+      inputResposta.value = llistaNotesEntrades.join(" ");
     }
 
     function nouAcord() {
-      // Comprovem el límit de 10 preguntes aquí
-      if (totalRespostes >= 10) {
-        bloquejarSiAcabat();
-        return;
-      }
-
-      acordsActuals = obtenirAcordsNivellActual();
-      const nomsAcordsDisponibles = Object.keys(acordsActuals).filter(nom => !acordsMostratsGlobal.includes(nom));
+      if (totalRespostes >= 10) { bloquejarSiAcabat(); return; }
       
-      if (nomsAcordsDisponibles.length === 0) {
-        acordsMostratsGlobal = acordsMostratsGlobal.filter(nom => !Object.keys(acordsActuals).includes(nom));
-        nouAcord();
-        return;
-      }
+      const acords = (nivellActualJoc === 'facil') ? acordsPerNivell.facil : (nivellActualJoc === 'mitja' ? acordsPerNivell.mitja : acordsPerNivell.dificil);
+      let noms = Object.keys(acords).filter(n => !acordsMostratsGlobal.includes(n));
+      if (noms.length === 0) { acordsMostratsGlobal = []; noms = Object.keys(acords); }
 
-      acordActual = nomsAcordsDisponibles[Math.floor(Math.random() * nomsAcordsDisponibles.length)];
-      notesActuals = acordsActuals[acordActual];
+      acordActual = noms[Math.floor(Math.random() * noms.length)];
+      notesActuals = acords[acordActual];
       acordsMostratsGlobal.push(acordActual);
-      acordPreguntaEl.textContent = `Acord de ${acordActual}`;
+      
+      document.getElementById("acordPregunta").textContent = `Acord de ${acordActual}`;
       resultatEl.innerHTML = "";
       inputResposta.value = "";
-      tempsEl.textContent = `Temps: ${tempsMaxim}s`;
+      llistaNotesEntrades = [];
       temps = tempsMaxim;
+      document.getElementById("temps").textContent = `Temps: ${temps}s`;
+      
       if (intervalId) clearInterval(intervalId);
       intervalId = setInterval(actualitzarTemps, 1000);
       respostaJaComprovada = false;
       btnSeguent.disabled = true;
-      inputResposta.disabled = false;
-      inputResposta.focus();
     }
 
     function actualitzarTemps() {
       temps--;
-      tempsEl.textContent = `Temps: ${temps}s`;
+      document.getElementById("temps").textContent = `Temps: ${temps}s`;
       if (temps <= 0) {
         clearInterval(intervalId);
         if (!respostaJaComprovada) {
-          soError.play();
-          const missatgeHtml = `Temps esgotat!<br><span class="resposta-correcta-error">${notesActuals.join(" ")}</span>`;
-          mostrarResultat(false, missatgeHtml);
+          document.getElementById("soError").play();
+          mostrarResultat(false, `Temps esgotat!<br><span class="resposta-correcta-error">${notesActuals.join(" ")}</span>`);
           totalRespostes++;
           respostaJaComprovada = true;
           btnSeguent.disabled = false;
@@ -260,88 +279,49 @@
       }
     }
 
-    function netejarNotes(notesArray) {
-      return notesArray.map(n => n.trim().toUpperCase()).sort();
-    }
-
     function comprovar() {
-      if (respostaJaComprovada || temps <= 0) return;
-      const resposta = inputResposta.value.trim().split(/\s+/);
-      if (resposta.length !== 3 && resposta[0] !== '') {
-        mostrarResultat(false, "Introdueix 3 notes separades per espais.");
-        return;
-      } else if (resposta[0] === '') {
-        return;
-      }
-      const respostaNeta = netejarNotes(resposta);
-      const correcteNeta = netejarNotes(notesActuals);
+      if (respostaJaComprovada || temps <= 0 || llistaNotesEntrades.length === 0) return;
+      
+      const resp = llistaNotesEntrades.map(n => n.toUpperCase()).sort().join(",");
+      const corr = [...notesActuals].map(n => n.toUpperCase()).sort().join(",");
+
       clearInterval(intervalId);
       totalRespostes++;
       respostaJaComprovada = true;
 
-      if (JSON.stringify(respostaNeta) === JSON.stringify(correcteNeta)) {
+      if (resp === corr) {
         punts++;
-        soCorrecte.play();
-        let missatge = "Correcte!";
-        
-        if (nivellActualJoc === 'facil') {
-          puntsNivellFacil++;
-          if (puntsNivellFacil === 4) {
-            nivellActualJoc = 'mitja';
-            missatge = "Correcte! 🎉 Has pujat al nivell Mitjà!";
-          }
-        } else if (nivellActualJoc === 'mitja') {
-          puntsNivellMitja++;
-          if (puntsNivellMitja === 4) {
-            nivellActualJoc = 'dificil';
-            missatge = "Correcte! 🔥 Has pujat al nivell Difícil!";
-          }
-        }
-        
-        mostrarResultat(true, missatge);
-
+        document.getElementById("soCorrecte").play();
+        let msg = "Correcte!";
+        if (nivellActualJoc === 'facil' && ++puntsNivellFacil === 4) { nivellActualJoc = 'mitja'; msg = "Correcte! 🎉 Nivell Mitjà!"; }
+        else if (nivellActualJoc === 'mitja' && ++puntsNivellMitja === 4) { nivellActualJoc = 'dificil'; msg = "Correcte! 🔥 Nivell Difícil!"; }
+        mostrarResultat(true, msg);
       } else {
-        soError.play();
-        const missatgeHtml = `Incorrecte.<br><span class="resposta-correcta-error">${notesActuals.join(" ")}</span>`;
-        mostrarResultat(false, missatgeHtml);
+        document.getElementById("soError").play();
+        mostrarResultat(false, `Incorrecte.<br><span class="resposta-correcta-error">${notesActuals.join(" ")}</span>`);
       }
       
-      puntsEl.textContent = `Punts: ${punts}`;
+      document.getElementById("punts").textContent = `Punts: ${punts}`;
       btnSeguent.disabled = false;
       bloquejarSiAcabat();
     }
 
-    function mostrarResultat(correcte, missatge) {
-      resultatEl.innerHTML = missatge;
+    function mostrarResultat(correcte, msg) {
+      resultatEl.innerHTML = msg;
       resultatEl.style.color = correcte ? "var(--accent-green)" : "var(--accent-pink)";
     }
 
     function bloquejarSiAcabat() {
-      // El joc s'acaba quan totalRespostes arriba a 10
       if (totalRespostes >= 10) {
-        resumEl.textContent = `Test acabat! Has fet ${punts} punts de 10.`;
+        document.getElementById("resum").textContent = `Test acabat! Has fet ${punts} punts de 10.`;
         btnSeguent.disabled = true;
-        inputResposta.disabled = true;
-        if(intervalId) clearInterval(intervalId); // Aturem el temps per si de cas
-        tempsEl.textContent = "Temps: 0s";
+        clearInterval(intervalId);
+        document.getElementById("temps").textContent = "Fi";
       }
     }
 
-    btnSeguent.addEventListener("click", () => {
-       nouAcord();
-    });
-
-    inputResposta.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        comprovar();
-      }
-    });
-
-    window.onload = () => {
-      soBenvinguda.play().catch(() => {});
-      nouAcord();
-    };
+    btnSeguent.addEventListener("click", nouAcord);
+    window.onload = () => { nouAcord(); };
   </script>
 </body>
 </html>
