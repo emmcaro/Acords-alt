@@ -27,31 +27,30 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      padding: 20px;
+      padding: 15px;
       box-sizing: border-box;
     }
 
     .container {
       background-color: var(--card-bg);
-      padding: 30px;
+      padding: 25px;
       border-radius: 20px;
       width: 100%;
-      max-width: 400px;
+      max-width: 450px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     }
     
     h1 {
-      font-size: 1.3em;
+      font-size: 1.2em;
       color: var(--primary-text);
       font-weight: 700;
-      margin: 0 0 25px 0;
+      margin: 0 0 20px 0;
     }
 
     .top-info {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       font-size: 0.9em;
     }
 
@@ -59,7 +58,7 @@
       font-size: 2.5em;
       font-weight: 900;
       color: var(--primary-text);
-      margin: 0 0 20px 0;
+      margin: 0 0 15px 0;
     }
 
     #resultat {
@@ -67,21 +66,20 @@
       font-size: 1.1em;
       min-height: 50px;
       line-height: 1.4;
-      color: var(--accent-pink);
       margin-bottom: 15px;
     }
     
     .resposta-correcta-error {
         color: var(--accent-green);
         font-size: 1.2em;
-        display: inline-block;
-        margin-top: 6px;
+        display: block;
+        margin-top: 4px;
     }
 
     input {
       padding: 15px;
       width: 100%;
-      font-size: 1.2em;
+      font-size: 1.3em;
       margin-bottom: 20px;
       box-sizing: border-box;
       background-color: var(--bg-dark);
@@ -89,33 +87,51 @@
       border-radius: 10px;
       color: var(--primary-text);
       text-align: center;
-      letter-spacing: 2px;
+      letter-spacing: 3px;
+      font-weight: bold;
     }
 
-    /* CONTENIDOR DE BOTONS */
-    .teclat {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
+    /* TECLAT ORGANITZAT PER FILES */
+    .teclat-container {
+      display: flex;
+      flex-direction: column;
       gap: 10px;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
     }
 
-    .btn-nota {
+    .fila-notes {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+
+    .fila-accions {
+      display: grid;
+      grid-template-columns: 0.8fr 0.8fr 1.2fr 1.2fr;
+      gap: 10px;
+    }
+
+    .btn-teclat {
       background-color: #414868;
       color: white;
       border: none;
-      padding: 15px 5px;
+      padding: 12px 2px;
       border-radius: 8px;
       font-weight: bold;
       cursor: pointer;
-      font-size: 1em;
-      transition: background 0.2s;
+      font-size: 0.95em;
+      transition: background 0.1s, transform 0.1s;
     }
 
-    .btn-nota:active { transform: scale(0.95); }
+    .fila-notes .btn-teclat {
+      font-size: 0.85em; /* Una mica més petit perquè càpiguen els 7 */
+    }
 
-    .btn-modificador { background-color: #565f89; }
-    .btn-esborrar { background-color: #3b4261; grid-column: span 2; }
+    .btn-mod { background-color: #565f89; font-size: 1.2em; }
+    .btn-del { background-color: #3b4261; }
+    .btn-ok { background-color: var(--accent-green); color: #1c2135; }
+
+    .btn-teclat:active { transform: scale(0.92); filter: brightness(1.2); }
 
     button#btnSeguent {
       display: block;
@@ -142,7 +158,7 @@
 <body>
 
   <div class="container">
-    <h1>🎹 Indica les notes de l'acord</h1>
+    <h1>🎹 Entrenador d'Acords</h1>
 
     <div class="top-info">
         <p id="punts">Punts: 0</p>
@@ -150,28 +166,30 @@
     </div>
 
     <p id="acordPregunta">Carregant...</p>
-    <p id="resultat"></p>
+    <div id="resultat"></div>
 
-    <input type="text" id="resposta" placeholder="Notes..." readonly />
+    <input type="text" id="resposta" placeholder="---" readonly />
 
-    <div class="teclat">
-      <button class="btn-nota" onclick="premerNota('C', 'Do')">Do</button>
-      <button class="btn-nota" onclick="premerNota('D', 'Re')">Re</button>
-      <button class="btn-nota" onclick="premerNota('E', 'Mi')">Mi</button>
-      <button class="btn-nota btn-modificador" onclick="premerModificador('#')">#</button>
-      
-      <button class="btn-nota" onclick="premerNota('F', 'Fa')">Fa</button>
-      <button class="btn-nota" onclick="premerNota('G', 'Sol')">Sol</button>
-      <button class="btn-nota" onclick="premerNota('A', 'La')">La</button>
-      <button class="btn-nota btn-modificador" onclick="premerModificador('b')">b</button>
-      
-      <button class="btn-nota" onclick="premerNota('B', 'Si')">Si</button>
-      <button class="btn-nota btn-esborrar" onclick="esborrarUltim()">Esborrar</button>
-      <button class="btn-nota btn-modificador" style="background-color: var(--accent-green); color: #1c2135;" onclick="comprovar()">OK</button>
+    <div class="teclat-container">
+      <div class="fila-notes">
+        <button class="btn-teclat" onclick="premerNota('C')">Do</button>
+        <button class="btn-teclat" onclick="premerNota('D')">Re</button>
+        <button class="btn-teclat" onclick="premerNota('E')">Mi</button>
+        <button class="btn-teclat" onclick="premerNota('F')">Fa</button>
+        <button class="btn-teclat" onclick="premerNota('G')">Sol</button>
+        <button class="btn-teclat" onclick="premerNota('A')">La</button>
+        <button class="btn-teclat" onclick="premerNota('B')">Si</button>
+      </div>
+
+      <div class="fila-accions">
+        <button class="btn-teclat btn-mod" onclick="premerMod('#')">#</button>
+        <button class="btn-teclat btn-mod" onclick="premerMod('b')">b</button>
+        <button class="btn-teclat btn-del" onclick="esborrar()">Esborrar</button>
+        <button class="btn-teclat btn-ok" onclick="comprovar()">OK</button>
+      </div>
     </div>
 
     <button id="btnSeguent" disabled>Següent Acord</button>
-
     <p id="resum"></p>
   </div>
 
@@ -190,39 +208,28 @@
     let acordActual = "", notesActuals = [], punts = 0, totalRespostes = 0;
     const tempsMaxim = 15;
     let temps = tempsMaxim, intervalId = null, respostaJaComprovada = false, acordsMostratsGlobal = [];
+    let llistaNotesEntrades = [];
 
     const btnSeguent = document.getElementById("btnSeguent");
     const inputResposta = document.getElementById("resposta");
-    const acordPreguntaEl = document.getElementById("acordPregunta");
     const resultatEl = document.getElementById("resultat");
-    const puntsEl = document.getElementById("punts");
-    const tempsEl = document.getElementById("temps");
-    const resumEl = document.getElementById("resum");
 
-    const soCorrecte = document.getElementById("soCorrecte");
-    const soError = document.getElementById("soError");
-    const soBenvinguda = document.getElementById("soBenvinguda");
-
-    // LÒGICA DELS BOTONS
-    let llistaNotesEntrades = [];
-
-    function premerNota(notaSimbol) {
+    function premerNota(nota) {
       if (respostaJaComprovada || llistaNotesEntrades.length >= 3) return;
-      llistaNotesEntrades.push(notaSimbol);
+      llistaNotesEntrades.push(nota);
       actualitzarInput();
     }
 
-    function premerModificador(mod) {
+    function premerMod(mod) {
       if (respostaJaComprovada || llistaNotesEntrades.length === 0) return;
-      let ultimaIndex = llistaNotesEntrades.length - 1;
-      // Evitem duplicar modificadors o posar-los on no toca
-      if (!llistaNotesEntrades[ultimaIndex].includes('#') && !llistaNotesEntrades[ultimaIndex].includes('b')) {
-        llistaNotesEntrades[ultimaIndex] += mod;
+      let ultimaIdx = llistaNotesEntrades.length - 1;
+      if (!llistaNotesEntrades[ultimaIdx].includes('#') && !llistaNotesEntrades[ultimaIdx].includes('b')) {
+        llistaNotesEntrades[ultimaIdx] += mod;
         actualitzarInput();
       }
     }
 
-    function esborrarUltim() {
+    function esborrar() {
       if (respostaJaComprovada) return;
       llistaNotesEntrades.pop();
       actualitzarInput();
@@ -232,31 +239,24 @@
       inputResposta.value = llistaNotesEntrades.join(" ");
     }
 
-    function obtenirAcordsNivellActual() {
-      if (nivellActualJoc === 'facil') return acordsPerNivell.facil;
-      if (nivellActualJoc === 'mitja') return acordsPerNivell.mitja;
-      return acordsPerNivell.dificil;
-    }
-
     function nouAcord() {
       if (totalRespostes >= 10) { bloquejarSiAcabat(); return; }
-      const acords = obtenirAcordsNivellActual();
-      const nomsDisponibles = Object.keys(acords).filter(nom => !acordsMostratsGlobal.includes(nom));
       
-      if (nomsDisponibles.length === 0) {
-        acordsMostratsGlobal = acordsMostratsGlobal.filter(nom => !Object.keys(acords).includes(nom));
-        nouAcord(); return;
-      }
+      const acords = (nivellActualJoc === 'facil') ? acordsPerNivell.facil : (nivellActualJoc === 'mitja' ? acordsPerNivell.mitja : acordsPerNivell.dificil);
+      let noms = Object.keys(acords).filter(n => !acordsMostratsGlobal.includes(n));
+      if (noms.length === 0) { acordsMostratsGlobal = []; noms = Object.keys(acords); }
 
-      acordActual = nomsDisponibles[Math.floor(Math.random() * nomsDisponibles.length)];
+      acordActual = noms[Math.floor(Math.random() * noms.length)];
       notesActuals = acords[acordActual];
       acordsMostratsGlobal.push(acordActual);
-      acordPreguntaEl.textContent = `Acord de ${acordActual}`;
+      
+      document.getElementById("acordPregunta").textContent = `Acord de ${acordActual}`;
       resultatEl.innerHTML = "";
       inputResposta.value = "";
       llistaNotesEntrades = [];
       temps = tempsMaxim;
-      tempsEl.textContent = `Temps: ${temps}s`;
+      document.getElementById("temps").textContent = `Temps: ${temps}s`;
+      
       if (intervalId) clearInterval(intervalId);
       intervalId = setInterval(actualitzarTemps, 1000);
       respostaJaComprovada = false;
@@ -265,11 +265,11 @@
 
     function actualitzarTemps() {
       temps--;
-      tempsEl.textContent = `Temps: ${temps}s`;
+      document.getElementById("temps").textContent = `Temps: ${temps}s`;
       if (temps <= 0) {
         clearInterval(intervalId);
         if (!respostaJaComprovada) {
-          soError.play();
+          document.getElementById("soError").play();
           mostrarResultat(false, `Temps esgotat!<br><span class="resposta-correcta-error">${notesActuals.join(" ")}</span>`);
           totalRespostes++;
           respostaJaComprovada = true;
@@ -279,53 +279,49 @@
       }
     }
 
-    function netejarNotes(notesArray) {
-      return notesArray.map(n => n.trim().toUpperCase()).sort();
-    }
-
     function comprovar() {
       if (respostaJaComprovada || temps <= 0 || llistaNotesEntrades.length === 0) return;
       
-      const respostaNeta = netejarNotes(llistaNotesEntrades);
-      const correcteNeta = netejarNotes(notesActuals);
-      
+      const resp = llistaNotesEntrades.map(n => n.toUpperCase()).sort().join(",");
+      const corr = [...notesActuals].map(n => n.toUpperCase()).sort().join(",");
+
       clearInterval(intervalId);
       totalRespostes++;
       respostaJaComprovada = true;
 
-      if (JSON.stringify(respostaNeta) === JSON.stringify(correcteNeta)) {
+      if (resp === corr) {
         punts++;
-        soCorrecte.play();
-        let missatge = "Correcte!";
-        if (nivellActualJoc === 'facil' && ++puntsNivellFacil === 4) { nivellActualJoc = 'mitja'; missatge = "Correcte! 🎉 Nivell Mitjà!"; }
-        else if (nivellActualJoc === 'mitja' && ++puntsNivellMitja === 4) { nivellActualJoc = 'dificil'; missatge = "Correcte! 🔥 Nivell Difícil!"; }
-        mostrarResultat(true, missatge);
+        document.getElementById("soCorrecte").play();
+        let msg = "Correcte!";
+        if (nivellActualJoc === 'facil' && ++puntsNivellFacil === 4) { nivellActualJoc = 'mitja'; msg = "Correcte! 🎉 Nivell Mitjà!"; }
+        else if (nivellActualJoc === 'mitja' && ++puntsNivellMitja === 4) { nivellActualJoc = 'dificil'; msg = "Correcte! 🔥 Nivell Difícil!"; }
+        mostrarResultat(true, msg);
       } else {
-        soError.play();
+        document.getElementById("soError").play();
         mostrarResultat(false, `Incorrecte.<br><span class="resposta-correcta-error">${notesActuals.join(" ")}</span>`);
       }
       
-      puntsEl.textContent = `Punts: ${punts}`;
+      document.getElementById("punts").textContent = `Punts: ${punts}`;
       btnSeguent.disabled = false;
       bloquejarSiAcabat();
     }
 
-    function mostrarResultat(correcte, missatge) {
-      resultatEl.innerHTML = missatge;
+    function mostrarResultat(correcte, msg) {
+      resultatEl.innerHTML = msg;
       resultatEl.style.color = correcte ? "var(--accent-green)" : "var(--accent-pink)";
     }
 
     function bloquejarSiAcabat() {
       if (totalRespostes >= 10) {
-        resumEl.textContent = `Test acabat! Has fet ${punts} punts de 10.`;
+        document.getElementById("resum").textContent = `Test acabat! Has fet ${punts} punts de 10.`;
         btnSeguent.disabled = true;
         clearInterval(intervalId);
-        tempsEl.textContent = "Fi";
+        document.getElementById("temps").textContent = "Fi";
       }
     }
 
     btnSeguent.addEventListener("click", nouAcord);
-    window.onload = () => { soBenvinguda.play().catch(() => {}); nouAcord(); };
+    window.onload = () => { nouAcord(); };
   </script>
 </body>
 </html>
